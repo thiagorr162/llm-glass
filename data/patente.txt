@@ -1,0 +1,899 @@
+US 20230242436A1
+
+a2) Patent Application Publication (10) Pub. No.: US 2023/0242436 Al
+
+as) United States
+
+ 
+
+Zhang et al. (43) Pub. Date: Aug. 3, 2023
+(54) GLASS WITH HIGH REFRACTIVE INDEX CO3B 5/08 (2006.01)
+FOR FIBER OPTIC IMAGING ELEMENT CO3B 5/18 (2006.01)
+WITH MEDIUM-EXPANSION AND ¢ eae xe (0001)
+FABRICATION METHOD THEREFOR COBB 37/027 (2006.01)
+(71) Applicant: China Building Materials Academy, CO3B 25/02 (2006.01)
+
+Beijing (CN)
+. aes (52) U.S. CL
+(72) Inventors: Lei Zhang, Beijing (CN); Zhenbo Cao, CPC .... _ CO3C 13/045 (2013.01); CO3B 5/08
+
+Beijing (CN); Jinsheng Jia, Beijing
+(CN); Yun Wang, Beijing (CN); Yue
+Zhao, Beijing (CN); Xian Zhang,
+Beijing (CN); Xiaofeng Tang, Beijing
+(CN), Yu Shi, Beijing (CN); Jing Zhang,
+Beijing (CN); Zhiheng Fan, Beijing
+(CN); Huichao Xu, Beijing (CN);
+Haoyang Yu, Beijing (CN); Puguang
+Song, Beijing (CN); Aixin Wang,
+Beijing (CN); Changhua Hong, Beijing
+(CN)
+
+(21) Appl. No.: —-17/768,692
+(22) PCT Filed:
+
+(86) PCT No.:
+
+§ 371 (0),
+(2) Date:
+
+Jan. 29, 2022
+PCT/CN2022/075011
+
+Apr. 13, 2022
+
+(30) Foreign Application Priority Data
+Sep. 14,2021 (CN) wees 202111074733.6
+
+Publication Classification
+
+(51) Int. Cl.
+C03C 13/04 (2006.01)
+CO3C 3/068 (2006.01)
+
+ 
+
+Q
+
+ 
+
+.01); CO3B 5/18 (2013.01); CO3B 5/225
+(2013.01); CO3B 25/02 (2013.01); CO3B
+37/027 (2013.01); CO3B 37/01268 (2013.01);
+CO3C 3/068 (2013.01); CO3C 2213/00
+(2013.01); GO2B 6/06 (2013.01)
+
+(57) ABSTRACT
+
+The present invention discloses a glass with high refractive
+index for fiber optic imaging elements with medium-expan-
+sion and fabrication method therefor, the glass comprising
+the following components in percentage by weight: SiO, 5-
+9%, AlsO3 0-1%, BsO3 23-28%, CaO 0-3%, BaO 6-12%,
+La,O3 30-34%, Nb»Os 4-8%, TasOs 0-1%, Y203 0-1%,
+ZnO 4-9%, TiO, 4-8%, ZrOz 4-6%, SnO, 0-1%. The present
+invention further provides a fabrication method for the glass
+with a high refractive index, comprising: putting raw mate-
+rials quartz sand, aluminum hydroxide, boric acid or boric
+anhydride, calcium carbonate, barium carbonate or barium
+nitrate, lanthanum oxide, niobium oxide, tantalum oxide,
+yttrium oxide, zinc oxide, titanium dioxide, zirconium
+oxide and stannic oxide, etc. into a platinum crucible
+according to the requirement of dosing, melting at a high
+temperature, cooling and fining, leaking and casting to
+form a glass rod, and then annealing, cooling and chilling
+the molded glass rod.
+US 2023/0242436 Al
+
+Aug. 3, 2023
+
+Patent Application Publication
+
+[ amary
+
+5, OAT C ISU |
+002 _ 808 60S OOP OGEe 002 DOL
+
+     
+                 
+
+sagen te OA. OX SIG LOFALO
+OF, HEX LY RIAA LO yo votsuedxe-ranipant ya. sseyry
+#¢ Uosundse-camiper Yim ssp
+
+en,
+
+  
+
+Os: OF X0E8'99=4 LD
+#£ BOTSTRGKS-UITUPOU YALA SSEILy
+
+Of AA P6OTLAALO
+Hp worstedxo-uniperd Ws S88]
+
+Df OE XK PET OLAALS
+#1 UoIsuedxa-IMipeMl Wii SeRTD
+
+TL DUEL VERE
+
+ABEL Rog
+
+Ds BEX FEC TG=A LD
+UOURdXS-UBIY UM SSEEED
+
+CRIS yee
+7268 ead
+
+ 
+
+DORE BSE
+
+Oh. OUP
+US 2023/0242436 Al
+
+GLASS WITH HIGH REFRACTIVE INDEX
+FOR FIBER OPTIC IMAGING ELEMENT
+WITH MEDIUM-EXPANSION AND
+FABRICATION METHOD THEREFOR
+
+TECHNICAL FIELD
+
+[0001] The present invention relates to the field of tech-
+nology of raw materials of fiber optic imaging elements
+and glass materials, in particular to a glass with high refrac-
+tive index for fiber optic imaging elements with medium-
+expansion and fabrication method therefor.
+
+BACKGROUD TECHNOLOGY
+
+[0002] Fiber optic imaging elements include fiber optic
+faceplates, fiber optic image inverters, fiber optic tapers,
+fiber optic bundle for image transmission, etc. Fiber optic
+imaging elements are photoelectric imaging devices with
+excellent performance, which is fabricated by unique com-
+positions of cladding glass, core glass and absorbing glass,
+and is fabricated by a drawing process of vacuum control
+and rod-tube combination, so that the product has good air
+tightness, small distortion, less spots, simple structure, small
+volume, light weight, large numerical aperture, high light
+transmission efficiency, small inter-stage coupling loss,
+high coupling efficiency, high resolution, clear and true
+image transmission, zero thickness image transfer and
+other characteristics, which can effectively improve the
+edge image quality. Fiber optic imaging elements are high-
+resolution imaging elements which formed by arranging
+tens of millions of optical fibers in parallel and heat press
+fusion process, and are key materials for image intensifiers
+and high-definition displays, which are widely used in var-
+ious cathode ray displays, camera tube, CCD coupling, low-
+level-light night vision, medical equipment display, high-
+definition TV imaging and other instruments and equip-
+ments that need to transmit images in military, criminal
+investigation, aerospace, medicine and other fields, and
+which is a high-tech product in the industry of photoelectron
+in 21 century.
+
+[0003] The most typical application of fiber optic imaging
+elements is as the optical input and output windows of low-
+level-light image intensifiers, which make an important role
+in improving the quality of imaging devices, and which in
+application need to be sealed with Kovar alloy, so effective
+sealing and matching with Kovar alloy having a similar
+coefficient of linear thermal expansion (50*10-7/°C) is
+required to improve the stability and prolong the service
+life of the low-level-light image tube. Fiber optic imaging
+elements currently used in China use a high expansion sys-
+tem with a coefficient of thermal expansion in the range of
+(87+45)*10-7/°C, which is far from the sealing matching
+degree of Kovar alloy. In order to improve the thermal sta-
+bility of the image intensifier device, it is necessary to adopt
+the fiber optic imaging elements with medium-expansion
+system, but there is no suitable material with medium-
+expansion system at present.
+
+SUMMARY
+
+[0004] In order to solve the technical problems in the
+prior, the present invention provides a glass with high
+tefractive index for fiber optic imaging elements with med-
+ium-expansion and fabrication method therefor.
+
+Aug. 3, 2023
+
+[0005] To achieve the above purposes, the technical solu-
+tion of the present invention is as follows:
+
+[0006] A composition of glass with high refractive index
+for fiber optic imaging elements with medium-expansion,
+comprises the following components in percentage by
+weight:
+
+SiO, 5-9%
+ALO; 0-1%
+B03 23-28%
+CaO 0-3%
+BaO 6-12%
+La,O, 30-34%
+Nb,Os 4.8%
+Ta,Os 0-1%
+Y203 0-1%
+ZnO 4.9%
+TiO, 4.8%
+Z103 4.6%
+nO, 0-1%
+[0007] Preferably, the composition comprises the follow-
+
+ing components in percentage by weight:
+
+SiO, 9%
+ALO; 1%
+B03 23%
+BaO 12%
+La,O3 34%
+Nb305 4%
+Ta,Os 0.5%
+ZnO 4%
+TiO, 8%
+ZxOz 4%
+SnO, 0.5%
+[0008] Further, the glass with high refractive index has a
+
+tefractive index of 1.80-1.82, an coefficient of average lin-
+ear thermal expansion of (68 +5) x 10-7/°C in the range of
+30-300° C., a strain point temperature of more than 600° C.,
+a devitrification temperature of more than 820° C., and a
+high spectral transmission. The glass does not contain any
+heavy metal oxides such as AsO3, Sb203, PbO, CdO, etc.,
+and has the advantages of good chemical stability and so on.
+[0009] Further, the present invention provides a fabrica-
+tion method for the glass with high refractive index for
+fiber optic imaging elements with medium-expansion
+using the composition related above, comprising the follow-
+ing steps:
+
+[0010] (1) putting quartz sand, aluminum hydroxide,
+boric acid or boric anhydride, calcium carbonate, bar-
+ium carbonate or barium nitrate, lanthanum oxide, nio-
+bium oxide, tantalum oxide, yttrium oxide, zine oxide,
+titanium dioxide, zirconium oxide and stannic oxide
+into a platinum crucible according to the requirement
+of dosing;
+
+[0011] (2) melting at a first preset temperature, stirring
+in the melting process, then cooling to a second preset
+temperature and fining to obtain a fining glass melt;
+
+[0012] (3) allowing the fining glass melt to flow down
+through a leaking port, and casting the fining glass melt
+in a mold to form a glass rod;
+US 2023/0242436 Al
+
+[0013] (4) annealing the molded glass rod in an anneal-
+ing furnace, and then cooling to the room temperature
+along with the furnace.
+
+[0014] e first preset temperature is 1350-1450° C.; the
+melting time is 4-8 hours; the stirring in the melting process
+is 1-2 times; the second preset temperature is 1300-
+1340° C.; the fining time is 1-2 hours.
+
+[0015] The annealing process is preserving heat for 1 hour
+at 600-650° C., and cooling to 60° C. from 600-650° C. for
+12 hours.
+[0016] ¢ present invention further provides a glass with
+high refractive index for fiber optic imaging elements with
+medium-expansion, which is fabricated according to the
+above method.
+
+[0017] The present invention further provides an optical
+glass, which is fabricated by using the glass with high
+tefractive index. The optical glass has a viscosity curve of
+strong liquid fragility in the viscosity range of 102-1013
+dPas and is easier to handle and reduce bubbles and stripes.
+[0018] @ present invention further provides an fiber
+optic imaging element including fiber optic faceplates,
+fiber optic image inverters, fiber optic tapers, fiber optic
+bundle for image transmission, wherein the fiber optic ima-
+ging elements is fabricated by a drawing process of combing
+acore glass rod and a cladding glass tube, and the core glass
+rod is fabricated by using the above glass with high refrac-
+tive index.
+
+[0019] The present invention further provides a glass with
+high refractive index for fiber optic imaging elements with
+medium-expansion in optical technology and photoelectro-
+nic technology, wherein the optical technology and photo-
+electronic technology includes technologies of imaging,
+projection, photoelectronic communication, mobile terminal
+and laser.
+
+[0020] Compared to the prior art, the glass with high
+tefractive index for fiber optic imaging elements with med-
+ium-expansion in the present invention has the following
+characteristics:
+
+[0021] (1) the core glass with medium-expansion has a
+coefficient of thermal expansion similar to Kovar alloy,
+the coefficient of mean linear thermal expansion in the
+range of 30 to 300° C. is (68+5)*10-7/°C, and the strain
+point temperature is more than 600° C., which can be
+used with a sealing material of medium-expansion low-
+level-light image intensifiers to achieve perfect sealing:
+
+[0022] (2) the core glass with medium-expansion has a
+high refractive index of np of 1.80~1.82, which can
+achieve the best light transmission ability of the fiber
+optic and satisfy the optimum condition of total reflec-
+tion of the fiber optic that number aperture N.A.>1;
+
+[0023] (3) the core glass with medium-expansion has a
+good anti-crystallization performance of devitrification
+temperature >820° C., and has a good transparency to
+visible light radiation and a good chemical stability,
+which can meet the requirement of special process of
+fabricating the fiber optic image inverter, and can
+achieve that the glass remain characteristics of the
+glass itself unchanged after going through many times
+of high temperature fiber drawing, high temperature
+fusing, high temperature twisting or taper drawing.
+
+[0024] (4) the fiber optic imaging element with med-
+ium-expansion does not contain any heavy metal oxi-
+des which seriously harmful to the environment such as
+As,03, Sb:03, PbO, CdO, ete.
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+Aug. 3, 2023
+
+[0025] The glass with a high refractive index for a fiber
+optic imaging element with medium-expansion provided
+by the present invention is suitable for use as the core
+glass of optical fibers in the fabrication for the fiber optic
+imaging element with medium-expansion.
+
+[0026] The glass with high refractive index of the present
+invention has a sealing matching degree with Kovar alloy
+and a good thermal stability, and adopts the fiber optic ima-
+ging element with medium-expansion with the coefficient of
+expansion of (68+5)10-7/°C to have a better thermal stabi-
+lity, adapt to temperature changes in a wider range of envir-
+onments such as deserts, plateaus, snow-covered areas,
+oceans, jungles, ete., and further to increase application per-
+formance and service life of the low-level-light image tube.
+[0027] In the present invention, SiO, is a glass-forming
+oxide, which plays an important role in the glass net, and
+improves chemical resistance. The weight percentage
+(wt.%) of SiO, is 5-9. When the content of SiO. is lower
+than 5 wt.%, it is difficult to obtain a glass with medium-
+expansion coefficient, and the chemical resistance stability
+of the glass is reduced at the same time; when the content of
+SiO, is higher than 10 wt.%, the high temperature viscosity
+of the glass will increase. As a result, the melting tempera-
+ture of the glass is too high and the probability of the glass
+phase separation increases at the same time.
+
+[0028] Al,O; is an intermediate oxide of the glass, and
+Al3* has two coordination states, that is, in tetrahedron or
+octahedron. When the content of oxygen is enough in the
+glass, an aluminum-oxygen tetrahedron [AlO,] is formed
+and forms a continuous network with a silicon-oxygen tetra-
+hedron. When the content of oxygen is insufficient in the
+glass, an aluminum-oxygen octahedron [AlOg] is formed,
+which is the network modifier and is in the hole of the sili-
+con-oxygen structure network, so Al,O3 and SiO, could
+form the main body of the glass network in a certain content
+range. The weight percentage (wt.%) of Al,O; is 0-1, and
+when the content of Al,O; is higher than 1 wt.%, the high
+temperature viscosity of the glass will increase. As a result,
+the glass melting temperature is too high and the devitrifica-
+tion performance declines at the same time.
+
+[0029] B.0; is a glass-forming oxide, and also the main
+component of the glass net, and also a fluxing agent to redu-
+cing glass melting viscosity. Boron-oxygen triangle [BO3]
+and boron-oxygen tetrahedron [BO,] are the structural com-
+ponents, and boron may exist as triangle [BO 3] or boron-
+oxygen tetrahedron [BO,] under different conditions. In
+high temperature melting conditions, it is difficult to form
+boron-oxygen tetrahedron, and can only exist in the form of
+trihedral, but at low temperature, B3* has the tendency to
+capture free oxygen to form tetrahedron under certain con-
+ditions, which makes the structure compact to improves the
+low temperature viscosity of glass, as it has the characteris-
+tics of reducing the glass viscosity at high temperature and
+increasing the glass viscosity at low temperature, and it is
+also the main component to reduce the refractive index of
+glass, which determines that its content range is small. The
+weight percentage (wt.%) of B2O3 is 23-28. when the con-
+tent of B20; is lower than 23 wt.%, which cannot play the
+tole to help melting and meanwhile reduces the chemical
+stability of the glass; when the content of B2O3 is more
+than 28 wt.%, which will reduce the refractive index of the
+glass and meanwhile increase the tendency of the glass
+phase separation.
+US 2023/0242436 Al
+
+[0030] In the present invention, the network former oxides
+with high content of BO; and SiO» will decline the refrac-
+tive index of the glass, thus it is impossible to achieve med-
+ium-expansion, or the glass system has a more tendency to
+devitrification under the condition of certain combinations
+of rare earth metal oxides and conventional network former
+oxides. For these reasons, the content of B2O3 must be more
+than the content of SiO,.
+
+[0031] CaO is a network modifier oxide of glass structure,
+and the weight percentage (wt.%) of CaO is 0-3. When the
+content of CaO is more than 3 wt.%, the chemical resistance
+stability of the glass is reduced, and the coefficient of ther-
+mal expansion of the glass is increased.
+
+[0032] BaO is a network modifier oxide of glass structure,
+which can effectively improve the refractive index of glass.
+The weight percentage (wt.%) of BaO is 6-12. When the
+content of BaO is less than 6 wt.%, the refractive index of
+glass is reduced; when the content of BaO is more than
+12 wt.%, the devitrification temperature of the glass is
+increased, the devitrification tendency of the glass is
+increased, and the density of the glass is increased signifi-
+cantly at the same time.
+
+[0033] La2Os is a lanthanide series rare earth oxide, which
+can improve the refractive index of glass. The weight per-
+centage (wt.%) of La.O3 is 30-34, when the content of
+La,O3 is more than 34 wt.%, the coefficient of thermal
+expansion of the glass will increase; when the content of
+La,03 is less than 30 wt.%, it will decrease the refractive
+index of the glass .
+
+[0034] Nb.Os is also a rare earth oxide, which can
+improve the refractive index and the process performance
+of glass, and lengthen the liquid fragility of glass. The
+weight percentage (wt.%) of Nb2Os is 4-8, when the content
+of Nb2Os is more than 8 wt.%, the density and coefficient of
+thermal expansion of the glass is increased; when the con-
+tent of Nb2Os is less than 4 wt.%, the refractive index of the
+glass is decreased. “high or low liquid fragility” refers to the
+steep of slope of the viscosity-temperature curve of the glass
+in the viscosity range of 102-1015 dPas, that is, the fluctuate
+level of the viscosity of the glass with temperature change in
+this viscosity range. The glass in the present invention has
+the advantage of being slightly stronger liquid fragility of
+glass than the comparable glass of the prior art in both cri-
+tical temperature ranges, and the glass in the present inven-
+tion is easier to handle and reduce stripes.
+
+[0035] Ta2Os is also a rare earth oxide, which can increase
+the refractive index of glass. The weight percentage (wt.%)
+of Ta,O; is 0-1, when the content of Ta,O; is more than
+1 wt.%, the density and coefficient of thermal expansion of
+the glass is increased, and the manufacturing cost will
+increased at the same time.
+
+[0036] Y.O3 is also a rare earth oxide, which can improve
+the refractive index and the process performance of glass
+and reduce the melting temperature and devitrification tem-
+perature of glass. The weight percentage (wt.%) of Y203; is
+0-1 .When the content of YO; is more than | wt.%, the cost
+of glass is increased.
+
+[0037] ZnO is used to reduce the melting temperature of
+glass, and improve the chemical resistance and refractive
+index of glass, the weight percentage (wt.%) of ZnO is 4-
+9%. When the content of ZnO is more than 9 wt.%, the che-
+mical resistance stability of glass is reduced and the coeffi-
+cient of thermal expansion of glass is increased; when the
+
+Aug. 3, 2023
+
+content of ZnO is less than 4 wt.%, the refractive index of
+glass will reduced.
+
+[0038] TiO, is used to improve the refractive index and
+the transmittance of glass and increase the oxide of the
+glass network, thereby reducing the density and high tem-
+perature viscosity of glass, which is beneficial to the fining
+of the glass melt and the elimination of stripes in the process
+of glass melting. The weight percentage (wt.%) of TiO, is 4-
+8. When the content of TiO, is more than 8 wt.%, the coeffi-
+cient of thermal expansion of glass is increased; when the
+content of TiO, is less than 4 wt.%, the refractive index of
+glass is reduced. In the high refractive index glass of the
+present invention, TiO, can react with iron impurity to
+form brown iron-titanate complex; in addition, the combina-
+tion of TiO, and rare earth metal oxides, Ta,O;, Nb2Os is
+very challenging in terms of process, because Nb2Os also
+teleases oxygen at high temperatures and competes free
+oxygen with TiO, which is still dissolved in the glass; if
+the process is not precisely controlled, the result may be a
+brown glass.
+
+[0039] ZrO, is used to improve the refractive index and
+the transmittance of glass, and has the effect of adjusting
+optical performances and improving the chemical resis-
+tance. The weight percentage (wt.%) of ZrO is 4-6. When
+the content of ZrO, is more than 6 wt.%, the glass melting
+temperature and the devitrification tendency will increased.
+[0040] SnO,z is used to fining the glass melting, which can
+improve the chemical resistance and the transmittance of
+glass. The weight percentage (wt.%) of SnO, is 0 ~1%.
+When the content of SnO; is more than 1 wt.%, the bubbles
+inside the glass will increased.
+
+[0041] In the present invention, the following expressions
+“without X” or “not contain component X” mean that com-
+ponent X hardly exists in the glass, that is, if any, the com-
+ponent exists only as an impurity, which is not added to the
+composition as a desired component. The glass of the pre-
+sent invention belongs to boron lanthanum barium silicate
+glass, and the glass does not contain heavy metal oxides
+such as As2O3, $b203, PbO, CdO, etc., which are seriously
+harmful to the environment, even if there is an extremely
+microelement amount, it is due to the introduction of other
+raw materials of the glass.
+
+BRIEF DESCRIPTION OF THE DRAWINGS
+
+[0042] FIG. 1 is a comparison diagram of tests of the coef-
+ficient of thermal expansion of embodiments in the present
+invention and a glass with high coefficient of thermal
+expansion.
+
+DETAILED DESCRIPTION
+
+[0043] In order to make the purposes, technical solutions
+and advantages of the present invention to be more clarity,
+the present invention will be further described in detail with
+reference to detailed embodiments, but not limited by the
+description.
+[0044] The measured parameters, measuring methods and
+instruments of the glass with high refractive index used for
+the fiber optic imaging element with medium-expansion of
+the present invention are as follows:
+[0045] (1) refractive index np [the refractive index of
+glass at A=589.3 nm];
+[0046] (2) the average coefficient of thermal expansion
+30/s00[ 10-7/°C] at 30-300° C.
+US 2023/0242436 Al
+
+[0047] Wherein the refractive index np of glass is mea-
+sured by a refractive index device; the coefficient of linear
+thermal expansion at 30-300° C. is measured by a horizontal
+dilatometer using the method specified in ISO 7991, and
+expressed by a coefficient of mean linear thermal expansion.
+Chemical compositions (wt.%) and glass performances of
+the embodiments are detailed listed in Table 1.
+
+TABLE 1
+
+Aug. 3, 2023
+
+oxide, titanium dioxide, zirconium oxide and stannic oxide
+are put into a platinum crucible and melted for 6 hours at
+1400° C. In the glass melting process, the glass is stirred
+twice to melt evenly. After melting, the glass is cooled to
+1320° C. and fining for 2 hours to obtain a molten glass.
+Thereafter, the molten glass is cast into a test specimen
+according to the specified requirements, then annealing is
+
+chemical compositions (wt.%) and physical values of the glass samples
+
+ 
+
+composition embodiment 1 embodiment 2 embodiment 3
+SiOz 9 7 7
+A105 1 0 0
+B03 23 25 is
+
+CaO 0 0 0
+
+BaO 12 8.4 10
+La,O; 34 32.8 32
+Nb;0s 4 7 6
+Ta,Os 05 0s 05
+Y203 0 0 0
+
+ZnO 4 8 8
+TiO, 8 7 6
+
+Z10z 4 4 5
+SnO, 05 0.26 05
+aso/3001 10°7/°C] 70.234 67.918 66.830
+np 1.80 1.82 1.82
+[0048] The raw materials used in the following embodi-
+
+ments and their requirements are as follows:
+
+[0049] Quartz sand (high purity, 150 wm oversize is less
+than 1%, 45 um undersize is less than 30%, the content of
+Fe,Q; is less than 0.01 wt.%), aluminum hydroxide (analy-
+tical purity, average particle size 50 um), boric acid or boron
+anhydride (400 um oversize is less than 10%, 63 um under-
+size is less than 10%), caletum carbonate (analytical purity,
+average particle size 250 um), barium carbonate (analytical
+purity, purity >99.0%), lanthanum trioxide (5N), niobium
+pentoxide (5N), tantalum pentoxide (5N), yttrium trioxide
+(SN), zine oxide (analytical purity), titanium dioxide (che-
+mical purity), zirconium oxide (analytical purity), stannic
+oxide (analytical purity).
+
+[0050] Referring to FIG. 1, CTE in figures is Coefficient
+of Thermal Expansion, which test range is 30-300° C. The
+coefficient of thermal expansion of the comparative high
+expansion glass is 91.324x10-7/°C, and the coefficient of
+thermal expansion of embodiment 1 to embodiment 5 in
+the present invention respectively is 70.234x10-7/°C,
+
+67.918*10-7/°C, 66.830*10-7/°C, 71.094x10-7/°C,
+68.607*10-7/°C.
+[0051] The present invention will be further described
+
+below through the specific preparation method of
+embodiments:
+
+Embodiment |
+[0052] Firstly, raw materials are selected according to the
+
+glass composition of embodiment | in Table 1, and oxides
+of elements with valence state change in the glass raw mate-
+rials such as Fe,O; are strictly controlled, and the content of
+Fe20; in a finished product of glass is less than 100 PPm.
+The glass batch meets the chemical compositions of glass in
+Table 1, and then quartz sand, aluminum hydroxide, boric
+acid, calcium carbonate, barium carbonate, lanthanum
+oxide, niobium oxide, tantalum oxide, yttrium oxide, zinc
+
+embodiment 4 embodiment 5
+
+8 5
+
+0 3
+24 28
+
+0
+
+7 6
+34 30
+7S 8
+
+0 05
+OS 0
+
+7 9
+
+5 4
+
+6 6
+
+1 05
+
+71.094 68.607
+
+1.82 1.81
+
+carried out and the annealing process is that preserving
+heat for 1 hour at 625° C., and cooling to 60° C. from
+625° C. for 12 hours, and then cooling to room temperature
+along with the furnace. Its test performance is shown in
+Table 1, (1) a refractive index is 1.80; (2) a coefficient of
+
+mean linear thermal expansion at 30-300° C. is
+70.234x10-7/°C.
+
+Embodiment 2
+[0053] The actual composition of glass refers to embodi-
+
+ment 2 in Table 1, and uses the same requirements for raw
+material as embodiment 1. Quartz sand, aluminum hydro-
+xide, boric anhydride, calctum carbonate, barium nitrate,
+lanthanum oxide, niobium oxide, tantalum oxide, yttrium
+oxide, zinc oxide, titanium dioxide, zirconium oxide and
+stannic oxide are put into a platinum crucible and melted
+for 8 hours at 1350° C. In the glass melting process, the
+glass is stirred once to melt evenly. After melting, the
+glass is cooled to 1300° C. and fining for 1 hour to obtain
+a molten glass. Thereafter, the molten glass is cast into a test
+sample according to the specified requirements, then anneal-
+ing is carried out and the annealing process is that preser-
+ving heat for | hour at 650° C., and cooling to 60° C. from
+650° C. for 12 hours, and then cooling to room temperature
+along with the furnace. The test conditions used are the
+same as embodiment 1, and the basic performances of sam-
+ples are shown in Table 1. (1) a refractive index is 1.82; (2)
+an coefficient of mean linear thermal expansion at 30-
+300° C. is 67.918x10-7/°C,
+
+Embodiment 3
+
+[0054] The actual composition of glass refers to embodi-
+ment 3 in Table 1, and uses the same raw material and
+Tequirements for raw material as embodiment |. Raw mate-
+rials are melted for 4 hours at 1450° C. In the glass melting
+US 2023/0242436 Al
+
+process, the glass is stirred twice to melt evenly. After melt-
+ing, the glass is cooled to 1340° C. and fining 2 hours to
+obtain a molten glass. Thereafter, the molten glass is cast
+into a test sample according to the specified requirements,
+then annealing is carried out and the annealing process is
+that preserving heat for 1 hour at 600° C., and cooling to
+60° C. from 600° C. for 12 hours, and then cooling to
+room temperature along with the furnace. The test condi-
+tions used are the same as embodiment 1, and the basic per-
+formances of samples are shown in Table 1. (1) a refractive
+index is 1.82; (2) an coefficient of mean linear thermal
+expansion at 30-300° C. is 66.830x10-7/°C.
+
+Embodiment 4
+
+[0055] The actual composition of glass refers to embodi-
+ment 4 in Table 1, uses the same raw material and require-
+ments for raw material as embodiment | and adopts the
+same melting process system and test conditions as embodi-
+ment 1. The basic performances of samples are shown in
+Table 1. (1) a refractive index is 1.82; (2) a coefficient of
+mean linear thermal expansion at 30-300° C. is
+71.094%10-7/°C.
+
+Embodiment 5
+
+[0056] The actual composition of glass refers to embodi-
+ment 5 in Table 1, uses the same raw material and require-
+ments for raw material as embodiment | and adopts the
+same melting process system and test conditions as embodi-
+ment 1. The basic performances of samples are shown in
+Table 1. (1) a refractive index is 1.81; (2) a coefficient of
+mean linear thermal expansion at 30-300° C. is
+68.607% 10-7/°C.
+
+[0057] From the data obtained in embodiments, it can be
+known that the glass with high refractive index for fiber
+optic imaging elements with medium-expansion of the pre-
+sent invention has the advantages of high refractive index
+and does not contain heavy metal oxides that are seriously
+harmful to the environment, and is suitable for fabricating
+fiber optic imaging elements. The fiber optic imaging ele-
+ment can be a fiber optical faceplate, a fiber optical image
+inverter, a fiber optical taper and a fiber optical bundle for
+image transmission, etc., wherein the core glass used is fab-
+ricated from the glass with high refractive index for fiber
+optic imaging elements with medium-expansion of the pre-
+sent invention.
+
+[0058] In addition, with the development trend of minia-
+turization of optical technology and photoelectronic tech-
+nology, a glass with a high refractive index has an excellent
+chemical stability, a low coefficient of thermal expansion,
+and an excellent transmission can shorten the focal length
+of lens to achieve that shorten the size of the component or
+lens assembly. The glass with a high refractive index of the
+present invention can be used as an optical glass for this type
+of technology.
+
+[0059] The above descriptions are only exemplary embo-
+diments of the present invention, and are not intended to
+limit the present invention. The protection scope of the pre-
+sent invention is claimed by the claims, and any modifica-
+tion, equivalent replacement, improvement, etc. made to the
+present invention by those skilled in the art within the spirit
+and protection scope of the present invention should be
+included in the protection scope of the present invention.
+
+Aug. 3, 2023
+
+1. A composition of glass with high refractive index for
+fiber optic imaging elements with medium-expansion, com-
+prising the following components in percentage by weight:
+
+SiO, 5-9%
+ALO; 0-1%
+B03 23-28%
+cao 0-3%
+BaO 6-12%
+LaO3 30-34%
+Nb2Os 4.8%
+Ta,Os 0-1%
+Y203 0-1%
+ZnO 4-9%
+TiO, 4-8%
+ZrO, 4-6%
+nO, 0-1%
+
+wherein the glass with high refractive index has a refractive
+index of 1.80-1.82, a coefficient of mean linear thermal
+expansion of (68 + 5) x 10-7/°C in the range of 30-
+300° C., a strain point temperature of more than
+600° C., and a devitrification temperature of more than
+820°C.
+
+2. The composition according to claim 1, comprising the
+
+following components in percentage by weight:
+
+SiO, 9%
+ALO; 1%
+B03 23%
+BaO 12%
+a0; 34%
+Nb,O5 4%
+Ta,Os 0.5%
+ZnO 4%
+Tio, 8%
+Z102 4%
+sn0, 0.5%
+
+3. (canceled)
+
+4. A fabrication method for the glass with high refractive
+index for fiber optic imaging elements with medium-expan-
+sion with the composition according to claim 1, comprising
+the following steps:
+
+(1) putting quartz sand, aluminum hydroxide, boric acid or
+boric anhydride, calcium carbonate, barium carbonate or
+barium nitrate, lanthanum oxide, niobium oxide, tanta-
+lum oxide, yttrium oxide, zinc oxide, titanium dioxide,
+zirconium oxide and stannic oxide into a platinum cruci-
+ble according to the requirement of dosing;
+
+(2) melting at a first preset temperature, stirring in the melt-
+ing process, then cooling to a second preset temperature
+and fining to obtain a fining glass melt;
+
+(3) allowing the fining glass melt to flow down through a
+leaking port, and casting the fining glass melt in amoldto
+form a glass rod;
+
+(4) annealing the molded glass rod in an annealing furnace,
+and then cooling to room temperature along with the
+furnace.
+
+5. The method according to claim 4, wherein the first preset
+
+temperature is 1350-1450° C.; the time of melting is 4-
+US 2023/0242436 Al
+
+8 hours; the stirring in the melting process is 1-2 times; the
+second preset temperature is 1300-1340° C.; the time of fining
+is 1-2 hours.
+
+6. The method according to claim 4, wherein the annealing
+process is preserving heat for 1 hour at 600-650° C., and cool-
+ing to 60° C. from 600-650° C. for 12 hours.
+
+7. A glass with high refractive index for fiber optic imaging
+elements with medium-expansion, wherein the glass with
+high refractive index is fabricated by using the fabrication
+method according to claim 4.
+
+8. The glass with a high refractive index for fiber optic ima-
+ging elements with medium-expansion according to claim 7,
+wherein the glass with high refractive index is fabricated into
+an optical glass having a viscosity curve with strong liquid
+fragility in the viscosity range of 102-10!5 dPas.
+
+9. A fiber optic imaging element, comprising a fiber optical
+faceplate, a fiber optical image inverter, a fiber optical taper
+anda fiber optical bundle for image transmission, wherein the
+fiber optic imaging element is fabricated by a drawing process
+of combing a core glass rod and a cladding glass tube, and the
+core glass rod is fabricating by using the glass with a high
+refractive index according to claim 7.
+
+10. (canceled)
+
+11. (canceled)
+
+ee eee
+
+Aug. 3, 2023
+
