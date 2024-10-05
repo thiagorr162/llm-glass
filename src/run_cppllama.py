@@ -27,10 +27,10 @@ local_model = "models/Hermes-2-Pro-Llama-3-8B-Q8_0.gguf"
 llm = ChatLlamaCpp(
     temperature=0.8,
     model_path=local_model,
-    n_ctx=2048,
+    n_ctx=10000,
     # n_gpu_layers=8,
     # n_batch=10,  # Should be between 1 and n_ctx, consider the amount of VRAM in your GPU.
-    # max_tokens=1024,
+    max_tokens=5000,
     n_threads=multiprocessing.cpu_count() - 2,
     # repeat_penalty=1.5,
     # top_p=0.5,
@@ -48,7 +48,10 @@ prompt = ChatPromptTemplate.from_messages(
             "of each glass. If there is no relevant information, return 'there is no information'."
             "Here are the contents of the document:\n\n----\n\n{document}.",
         ),
-        ("human", "{input}"),
+        (
+            "human",
+            "{input}",
+        ),
     ]
 )
 prompt = ChatPromptTemplate.from_messages(
@@ -61,7 +64,10 @@ prompt = ChatPromptTemplate.from_messages(
             "its refractive index."
             "Here are the contents of the document:\n\n----\n\n{document}.",
         ),
-        ("human", "{input}"),
+        (
+            "human",
+            "{input}",
+        ),
     ]
 )
 
