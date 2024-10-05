@@ -10,20 +10,24 @@ def split_document(document):
 
 
 file_path = "data/patente.txt"
+grammar_path = "grammars/glasses.gbnf"
 
 with open(file_path, "r") as file:
     data = file.read()
 
+with open(grammar_path, "r") as file:
+    grammar = file.read()
+
 chunks = split_document(data)
 chunk = chunks[17]
 
-local_model = "models/Hermes-2-Pro-Llama-3-8B-Q4_K_M.gguf"
+local_model = "models/Hermes-2-Pro-Llama-3-8B-Q8_0.gguf"
 
 
 llm = ChatLlamaCpp(
-    temperature=0.5,
+    temperature=0.8,
     model_path=local_model,
-    n_ctx=2040,
+    n_ctx=2048,
     # n_gpu_layers=8,
     # n_batch=10,  # Should be between 1 and n_ctx, consider the amount of VRAM in your GPU.
     # max_tokens=1024,
@@ -31,9 +35,22 @@ llm = ChatLlamaCpp(
     # repeat_penalty=1.5,
     # top_p=0.5,
     verbose=True,
+    grammar=grammar,
 )
 
-
+prompt = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            "You are a helpful assistant. Given the document related to glasses, "
+            "your task is to analyze the document and extract the chemical composition of all glasses "
+            "described in the document, detailing the percentage of each chemical element and the refractive index "
+            "of each glass. If there is no relevant information, return 'there is no information'."
+            "Here are the contents of the document:\n\n----\n\n{document}.",
+        ),
+        ("human", "{input}"),
+    ]
+)
 prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -41,8 +58,7 @@ prompt = ChatPromptTemplate.from_messages(
             "You are a helpful assistant. Given the document related to glasses,"
             "your task is to analyze the document and extract the chemical composition of all glasses"
             "described in the document, detailing the percentage of each chemical element, and "
-            "listing the key properties associated with each glass."
-            "If there is no relevant information, return 'there is no information'."
+            "its refractive index."
             "Here are the contents of the document:\n\n----\n\n{document}.",
         ),
         ("human", "{input}"),
@@ -54,10 +70,12 @@ chain = prompt | llm
 ai_msg = chain.invoke(
     {
         "document": chunk,  # Passa o pedaço do documento
-        "input": "Respond to me in JSON format. List the chemical compositions of the glass mentioned in the document"
-        "along with the percentage of each element, and the key properties associated with each glass type. ",
+        "input": "List the chemical compositions of the glass mentioned in the document"
+        "along with its refractive index. ",
     }
 )
+
+
 print(ai_msg.content)
 
 breakpoint()
