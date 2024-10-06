@@ -3,6 +3,7 @@
 /bin
 /cache
 /data/patents
+/data/llm_output
 /docs
 /models
 /out
