@@ -10,12 +10,14 @@ def run_llm(data):
         [
             (
                 "system",
-                "You are a knowledgeable assistant. Given the following document related to glass,"
-                "your task is to analyze the document and extract the chemical composition of each glass mentioned,"
-                "detailing the percentage of each element, using their chemical symbols "
-                "(e.g., Si for Silicon, O for Oxygen), and listing the key properties associated with each glass."
-                "Return the information in a structured format. If there is no relevant information, respond with"
-                "'there is no information'. Here are the contents of the document:\n\n----\n\n{document}.",
+                "You are a knowledgeable assistant. Given the following document related to glass compositions, "
+                "your task is to extract the chemical composition of each glass mentioned,"
+                "detailing the percentage of each element using their chemical symbols"
+                "(e.g., Si for Silicon, O for Oxygen), and listing the key properties associated with "
+                "each specific glass. Only use information explicitly provided in the document. "
+                "If no specific glass or composition is mentioned, respond with 'there is no information'. "
+                "Do not return generic examples of glass types unless they are mentioned in the document. "
+                "Here are the contents of the document:\n\n----\n\n{document}.",
             ),
             ("human", "{input}"),
         ]
@@ -30,14 +32,15 @@ def run_llm(data):
             "document": data,  # Pass the document chunk
             "input": (
                 "Respond in JSON format. For each glass mentioned in the document, "
-                "list the glass name followed by its chemical composition using the element symbols"
-                " (e.g., Si for Silicon), and associated key properties. "
-                "If there is no information about a specific glass, return 'there is no information'."
+                "list the glass name followed by its chemical composition using the element symbols "
+                "(e.g., Si for Silicon) and associated key properties. Only include information from the document. "
+                "If no relevant information is available, return 'there is no information'. Avoid returning "
+                "generic glass types or examples unless they are specifically mentioned in the document."
             ),
         }
     )
 
-    return ai_msg  # Return the LLM output
+    return ai_msg.content  # Return the LLM output
 
 
 json_directory = Path("data/patents")
