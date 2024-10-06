@@ -63,6 +63,7 @@ for json_file in json_directory.glob("*.json"):
         # Salvar o arquivo JSON atualizado
         with open(json_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"{json_file} done!!!")
 
     else:
         print(f"LLM already processed for {json_file}. Skipping...")
