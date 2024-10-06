@@ -71,21 +71,23 @@ def get_patent_links(search_url):
     return links
 
 
-page = 1
-search_url = (
-    f"https://www.freepatentsonline.com/result.html?"
-    f"p={page}&sort=relevance&srch=top&"
-    f"query_txt=glass+composition&patents_us=on"
-)
+page_max = 100
 
-patent_links = get_patent_links(search_url)
+for page in range(1, page_max):
+    search_url = (
+        f"https://www.freepatentsonline.com/result.html?"
+        f"p={page}&sort=relevance&srch=top&"
+        f"query_txt=glass+composition&patents_us=on"
+    )
 
-for pat in patent_links:
-    patent_id = extract_patent_id_from_url(pat)
-    json_file_path = Path(f"data/patents/{patent_id}.json")
+    patent_links = get_patent_links(search_url)
 
-    # Verifica se o arquivo já existe
-    if not json_file_path.exists():
-        extract_claims_from_html(pat)
-    else:
-        print(f"Arquivo {json_file_path} já existe. Pulando extração.")
+    for pat in patent_links:
+        patent_id = extract_patent_id_from_url(pat)
+        json_file_path = Path(f"data/patents/{patent_id}.json")
+
+        # Verifica se o arquivo já existe
+        if not json_file_path.exists():
+            extract_claims_from_html(pat)
+        else:
+            print(f"Arquivo {json_file_path} já existe. Pulando extração.")
