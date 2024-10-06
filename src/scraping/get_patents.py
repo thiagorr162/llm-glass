@@ -1,8 +1,9 @@
 import json
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
-from pathlib import Path
+
 
 def extract_patent_id_from_url(url):
     # Extrai o ID da patente da URL (última parte após a "/")
@@ -16,10 +17,10 @@ def extract_claims_from_html(url):
         response.raise_for_status()
 
         # Faz o parsing do conteúdo HTML da página
-        soup = BeautifulSoup(response.content, 'html.parser')
+        soup = BeautifulSoup(response.content, "html.parser")
 
         # Encontra o elemento <div> que contém "Claims:"
-        claims_div = soup.find('div', class_='disp_elm_title', string='Claims:')
+        claims_div = soup.find("div", class_="disp_elm_title", string="Claims:")
 
         if claims_div:
             # Acha o próximo conteúdo após o div "Claims:"
@@ -27,10 +28,7 @@ def extract_claims_from_html(url):
             claims_text = claims_section.get_text(strip=True) if claims_section else "Seção de Claims não encontrada."
 
             # Estrutura do JSON a ser salvo
-            patent_data = {
-                "url": url,
-                "claims": claims_text
-            }
+            patent_data = {"url": url, "claims": claims_text}
 
             # Cria o diretório usando pathlib
             output_dir = Path("data/patents/")
@@ -54,7 +52,10 @@ def extract_claims_from_html(url):
 
 def get_patent_links(search_url):
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/91.0.4472.124 Safari/537.36"
+        )
     }
     response = requests.get(search_url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -71,17 +72,20 @@ def get_patent_links(search_url):
 
 
 page = 1
-search_url = f"https://www.freepatentsonline.com/result.html?p={page}&sort=relevance&srch=top&query_txt=glass+composition&patents_us=on"
+search_url = (
+    f"https://www.freepatentsonline.com/result.html?"
+    f"p={page}&sort=relevance&srch=top&"
+    f"query_txt=glass+composition&patents_us=on"
+)
 
 patent_links = get_patent_links(search_url)
 
 for pat in patent_links:
     patent_id = extract_patent_id_from_url(pat)
     json_file_path = Path(f"data/patents/{patent_id}.json")
-    
+
     # Verifica se o arquivo já existe
     if not json_file_path.exists():
         extract_claims_from_html(pat)
     else:
         print(f"Arquivo {json_file_path} já existe. Pulando extração.")
-
