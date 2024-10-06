@@ -21,11 +21,7 @@ def run_llm(data):
         ]
     )
 
-    llm = ChatOllama(
-        model="llama3.1",
-        temperature=0.8,
-        format="json",
-    )
+    llm = ChatOllama(model="llama3.1", temperature=0.8, format="json")
 
     chain = prompt | llm
 
@@ -45,25 +41,30 @@ def run_llm(data):
 
 
 json_directory = Path("data/patents")
+output_directory = Path("data/llm_output")
+output_directory.mkdir(parents=True, exist_ok=True)  # Cria o diretório se ele não existir
 
 # Iterar por todos os arquivos JSON no diretório
 for json_file in json_directory.glob("*.json"):
-    with open(json_file, "r", encoding="utf-8") as f:
-        # Ler o conteúdo do arquivo JSON
-        data = json.load(f)
+    output_file = output_directory / json_file.with_suffix(".txt").name
 
-    # Verificar se a chave "llm_output" já existe
-    if "llm_output" not in data:
-        # Se a chave não existir, rodar o LLM
+    # Verificar se o arquivo de saída já existe
+    if not output_file.exists():
+        with open(json_file, "r", encoding="utf-8") as f:
+            # Ler o conteúdo do arquivo JSON
+            data = json.load(f)
+
+        # Rodar o LLM
         llm_output = run_llm(data)
 
-        # Atribuir a saída do LLM à nova chave "llm_output"
-        data["llm_output"] = llm_output
+        # Criar uma string que combina os dados originais e a saída do LLM
+        combined_output = {"original_data": data, "llm_output": llm_output}
 
-        # Salvar o arquivo JSON atualizado
-        with open(json_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-        print(f"{json_file} done!!!")
+        # Escrever a combinação dos dados originais e a saída do LLM em um arquivo de texto
+        with open(output_file, "w", encoding="utf-8") as f:
+            json.dump(combined_output, f, ensure_ascii=False, indent=4)
+
+        print(f"LLM output saved to {output_file}")
 
     else:
-        print(f"LLM already processed for {json_file}. Skipping...")
+        print(f"LLM output already exists for {json_file}. Skipping...")
