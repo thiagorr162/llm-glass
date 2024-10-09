@@ -27,7 +27,7 @@ def format_table_as_text(table):
 def save_raw_tables_from_html(url):
     try:
         # Acessa a página da patente
-        url = "https://www.freepatentsonline.com/9957191.html"  # Mantida aqui como exemplo para teste
+        # url = "https://www.freepatentsonline.com/9957191.html"  # Mantida aqui como exemplo para teste
         response = requests.get(url)
         response.raise_for_status()
 
