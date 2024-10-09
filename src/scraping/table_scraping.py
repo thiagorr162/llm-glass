@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import requests
@@ -24,7 +25,12 @@ def format_table_as_text(table):
     return "\n".join(table_text)
 
 
-def save_raw_tables_from_html(url):
+def contains_desired_compounds(table_text, desired_compounds):
+    # Verifica se pelo menos um dos compostos desejados está presente no texto da tabela
+    return any(compound in table_text for compound in desired_compounds)
+
+
+def save_raw_tables_from_html(url, desired_compounds):
     try:
         # Acessa a página da patente
         # url = "https://www.freepatentsonline.com/9957191.html"  # Mantida aqui como exemplo para teste
@@ -37,22 +43,32 @@ def save_raw_tables_from_html(url):
         # Encontra a tag <table>
         tables = soup.find_all("table")
 
-        if tables:
-            # Cria o diretório usando pathlib baseado no ID da patente
-            patent_id = extract_patent_id_from_url(url)
-            output_dir = Path(f"data/patents/{patent_id}")
-            output_dir.mkdir(parents=True, exist_ok=True)
+        # Inicializa um contador de tabelas salvas
+        saved_tables = 0
 
-            # Converte cada tabela para texto formatado e salva em um arquivo separado
+        if tables:
+            # Converte cada tabela para texto formatado e salva se contiver compostos desejados
             for idx, table in enumerate(tables, start=1):
                 table_text = format_table_as_text(table)  # Converte a tabela para texto formatado
-                table_file_path = output_dir / f"table_{idx}.txt"
 
-                # Salva o texto formatado da tabela no arquivo .txt
-                with open(table_file_path, "w") as table_file:
-                    table_file.write(table_text)
+                if contains_desired_compounds(table_text, desired_compounds):
+                    # Apenas cria a pasta se for necessário salvar a tabela
+                    if saved_tables == 0:
+                        patent_id = extract_patent_id_from_url(url)
+                        output_dir = Path(f"data/patents/{patent_id}")
+                        output_dir.mkdir(parents=True, exist_ok=True)
 
-            print(f"Tabelas extraídas com sucesso e salvas em '{output_dir}'.")
+                    table_file_path = output_dir / f"table_{idx}.txt"
+
+                    # Salva o texto formatado da tabela no arquivo .txt
+                    with open(table_file_path, "w") as table_file:
+                        table_file.write(table_text)
+
+                    print(f"Tabela {idx} salva em '{table_file_path}'.")
+                    saved_tables += 1
+
+            if saved_tables == 0:
+                print("Nenhuma tabela contém compostos desejados. Nenhum arquivo foi salvo.")
         else:
             print("Elemento '<table>' não encontrado na página.")
 
@@ -81,10 +97,15 @@ def get_patent_links(search_url):
     return links
 
 
-# Configuração para buscar múltiplas páginas de patentes
-page_max = 2
+# Leitura dos compostos desejados a partir do arquivo JSON
+with open("json/properties.json", "r") as json_file:
+    data = json.load(json_file)
+    desired_compounds = data["desired_compounds"]
 
-for page in range(1, page_max):
+# Configuração para buscar múltiplas páginas de patentes
+page_max = 1
+
+for page in range(1, page_max + 1):
     search_url = (
         f"https://www.freepatentsonline.com/result.html?"
         f"p={page}&sort=relevance&srch=top&"
@@ -99,6 +120,6 @@ for page in range(1, page_max):
 
         # Verifica se o diretório da patente já existe
         if not output_dir.exists():
-            save_raw_tables_from_html(pat)
+            save_raw_tables_from_html(pat, desired_compounds)
         else:
             print(f"Pasta {output_dir} já existe. Pulando extração.")
