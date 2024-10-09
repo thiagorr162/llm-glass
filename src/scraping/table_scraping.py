@@ -13,6 +13,7 @@ def extract_patent_id_from_url(url):
 def save_raw_tables_from_html(url):
     try:
         # Acessa a página da patente
+        # url = "https://www.freepatentsonline.com/9957191.html" # good example for scraping
         response = requests.get(url)
         response.raise_for_status()
 
@@ -20,11 +21,10 @@ def save_raw_tables_from_html(url):
         soup = BeautifulSoup(response.content, "html.parser")
 
         # Encontra a tag <patent-tables>
-        patent_tables = soup.find("patent-tables")
+        tables = soup.find_all("patent-tables")
 
-        if patent_tables:
+        if tables:
             # Encontra todas as tabelas dentro de <patent-tables>
-            tables = patent_tables.find_all("table")
             raw_tables_html = []
 
             # Armazena cada tabela crua como HTML
