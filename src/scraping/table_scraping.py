@@ -1,4 +1,3 @@
-import json
 from pathlib import Path
 
 import requests
@@ -10,45 +9,52 @@ def extract_patent_id_from_url(url):
     return url.split("/")[-1].split(".")[0]
 
 
+def format_table_as_text(table):
+    # Formata a tabela em HTML como um texto com separador de vírgula
+    rows = table.find_all("tr")  # Encontra todas as linhas da tabela
+    table_text = []
+
+    for row in rows:
+        columns = row.find_all(["th", "td"])  # Encontra todas as células
+        row_text = [col.get_text(strip=True) for col in columns]  # Extrai o texto de cada célula
+        # Junta as células da linha com separação por vírgula
+        table_text.append(",".join(row_text))
+
+    # Junta todas as linhas da tabela, separadas por quebras de linha
+    return "\n".join(table_text)
+
+
 def save_raw_tables_from_html(url):
     try:
         # Acessa a página da patente
-        # url = "https://www.freepatentsonline.com/9957191.html" # good example for scraping
+        url = "https://www.freepatentsonline.com/9957191.html"  # Mantida aqui como exemplo para teste
         response = requests.get(url)
         response.raise_for_status()
 
         # Faz o parsing do conteúdo HTML da página
         soup = BeautifulSoup(response.content, "html.parser")
 
-        # Encontra a tag <patent-tables>
-        tables = soup.find_all("patent-tables")
+        # Encontra a tag <table>
+        tables = soup.find_all("table")
 
         if tables:
-            # Encontra todas as tabelas dentro de <patent-tables>
-            raw_tables_html = []
-
-            # Armazena cada tabela crua como HTML
-            for table in tables:
-                raw_tables_html.append(str(table))  # Armazena a tabela como HTML
-
-            # Estrutura do JSON a ser salvo
-            patent_data = {"url": url, "tables": raw_tables_html}
-
-            # Cria o diretório usando pathlib
-            output_dir = Path("data/patents/")
+            # Cria o diretório usando pathlib baseado no ID da patente
+            patent_id = extract_patent_id_from_url(url)
+            output_dir = Path(f"data/patents/{patent_id}")
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            # Extrai o ID da patente da URL e salva o arquivo com esse nome
-            patent_id = extract_patent_id_from_url(url)
-            json_file_path = output_dir / f"{patent_id}_tables.json"
+            # Converte cada tabela para texto formatado e salva em um arquivo separado
+            for idx, table in enumerate(tables, start=1):
+                table_text = format_table_as_text(table)  # Converte a tabela para texto formatado
+                table_file_path = output_dir / f"table_{idx}.txt"
 
-            # Salva os dados no formato JSON
-            with open(json_file_path, "w") as json_file:
-                json.dump(patent_data, json_file, indent=4)
+                # Salva o texto formatado da tabela no arquivo .txt
+                with open(table_file_path, "w") as table_file:
+                    table_file.write(table_text)
 
-            print(f"Tabelas cruas extraídas com sucesso e salvas em '{json_file_path}'.")
+            print(f"Tabelas extraídas com sucesso e salvas em '{output_dir}'.")
         else:
-            print("Elemento '<patent-tables>' não encontrado na página.")
+            print("Elemento '<table>' não encontrado na página.")
 
     except requests.exceptions.RequestException as e:
         print(f"Erro ao acessar a página: {e}")
@@ -89,10 +95,10 @@ for page in range(1, page_max):
 
     for pat in patent_links:
         patent_id = extract_patent_id_from_url(pat)
-        json_file_path = Path(f"data/patents/{patent_id}_tables.json")
+        output_dir = Path(f"data/patents/{patent_id}")
 
-        # Verifica se o arquivo já existe
-        if not json_file_path.exists():
+        # Verifica se o diretório da patente já existe
+        if not output_dir.exists():
             save_raw_tables_from_html(pat)
         else:
-            print(f"Arquivo {json_file_path} já existe. Pulando extração.")
+            print(f"Pasta {output_dir} já existe. Pulando extração.")
