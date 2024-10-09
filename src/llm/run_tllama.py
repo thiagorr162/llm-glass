@@ -12,33 +12,21 @@ def run_llm(document):
     table_text = soup.get_text()
 
     # Inicialize o modelo Ollama
-    llm = ChatOllama(model="llama3.1", temperature=0.8, format="json")
+    llm = ChatOllama(
+        model="llama3.1",
+        temperature=0.8,
+        # format="json",
+    )
 
     # Template de prompt para o modelo Ollama
     prompt_template = PromptTemplate(
         input_variables=["table_text"],
         template="""
-        Your task is to extract data from the following HTML table, which contains chemical elements and properties of glasses as rows, and different glass samples as columns. 
-
-        Each glass sample should be represented as a JSON object. In the JSON structure, the **keys** should correspond to chemical elements and properties (e.g., SiO2, Al2O3, etc.), and the **values** should represent the proportion or value of each element and property for that specific glass sample.
-
-        Ensure the following:
-        1. The JSON output should have one object per glass sample.
-        2. For each object, the keys represent the chemical elements and their properties.
-        3. The values should correspond to the proportion or value of that element/property in the respective glass sample.
+        I will provide you with an HTML table. Your task is to extract all data as a csv. Do not return any extra text, only the csv table.
 
         Table content:
         {table_text}
-
-        Return the data in a structured JSON format where each glass sample is an object, like this:
-        [
-            {{"SiO2": 60.45, "Al2O3": 15.42, "Fe2O3": 0.29, "Density": 2.62, ...}},
-            {{"SiO2": 60.57, "Al2O3": 15.45, "Fe2O3": 0.29, "Density": 2.61, ...}},
-            ...
-        ]
-        
-        Ensure the integrity of the data, keeping the structure consistent across all glass samples.
-        """
+        """,
     )
     # Formata o prompt com o conteúdo da tabela
     prompt = prompt_template.format(table_text=table_text)
@@ -46,6 +34,8 @@ def run_llm(document):
     # Executa o modelo com o prompt
     response = llm.invoke(prompt)  # Usa invoke para processar o prompt diretamente
 
+    print(response.content)
+    breakpoint()
     return response.content  # Retorna o conteúdo gerado pelo modelo
 
 
@@ -69,7 +59,6 @@ for json_file in json_directory.glob("*.json"):
                 # Iterar por todas as tabelas no arquivo JSON e passar cada uma para o LLM
                 for tab in data["tables"]:
                     llm_output = run_llm(tab)  # Passar o HTML da tabela diretamente para o LLM
-                    breakpoint()
 
                     # Adicionar a saída ao JSON
                     data.setdefault("llm_output", []).append(llm_output)
