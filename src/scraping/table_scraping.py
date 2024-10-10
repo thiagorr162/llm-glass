@@ -40,7 +40,7 @@ def save_raw_tables_from_html(url, desired_compounds):
         tables = soup.find_all("patent-tables")
 
         if not tables:
-            print("Elemento '<table>' não encontrado na página.")
+            print("Elemento '<patent-tables>' não encontrado na página.")
             return 0
 
         patent_id = extract_patent_id_from_url(url)
@@ -113,6 +113,10 @@ if __name__ == "__main__":
         for pat in patent_links:
             patent_id = extract_patent_id_from_url(pat)
             output_dir = Path(f"data/patents/{patent_id}")
+
+            if output_dir.exists():
+                print(f"Pasta {output_dir} já existe. Pulando extração.")
+                continue
 
             # Salvar as tabelas de dados
             saved_tables = save_raw_tables_from_html(pat, desired_compounds)
