@@ -37,7 +37,7 @@ def save_raw_tables_from_html(url, desired_compounds):
         response = requests.get(url)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, "html.parser")
-        tables = soup.find_all("table")
+        tables = soup.find_all("patent-tables")
 
         if not tables:
             print("Elemento '<table>' não encontrado na página.")
@@ -95,8 +95,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    keyword = args.keyword
-    keyword = keyword.replace(" ", "+")
+    keyword = args.keyword.replace(" ", "+")
 
     with open("json/properties.json", "r") as json_file:
         desired_compounds = json.load(json_file)["desired_compounds"]
@@ -111,7 +110,22 @@ if __name__ == "__main__":
         for pat in patent_links:
             patent_id = extract_patent_id_from_url(pat)
             output_dir = Path(f"data/patents/{patent_id}")
+
             if not output_dir.exists():
+                # Cria o diretório da patente, se ainda não existir
+                output_dir.mkdir(parents=True, exist_ok=True)
+
+                # Salva as tabelas de dados
                 save_raw_tables_from_html(pat, desired_compounds)
+
+                # Cria e salva o arquivo metadata.txt
+                metadata_file_path = output_dir / "metadata.txt"
+                with open(metadata_file_path, "w") as metadata_file:
+                    metadata_file.write(f"Patent URL: {pat}\n")
+                    metadata_file.write(f"Page Max: {args.page_max}\n")
+                    metadata_file.write(f"Keyword: {args.keyword}\n")
+
+                print(f"Metadados salvos em '{metadata_file_path}'.")
+
             else:
                 print(f"Pasta {output_dir} já existe. Pulando extração.")
