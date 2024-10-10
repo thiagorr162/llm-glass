@@ -41,7 +41,7 @@ def save_raw_tables_from_html(url, desired_compounds):
 
         if not tables:
             print("Elemento '<table>' não encontrado na página.")
-            return
+            return 0
 
         patent_id = extract_patent_id_from_url(url)
         output_dir = Path(f"data/patents/{patent_id}")
@@ -56,8 +56,11 @@ def save_raw_tables_from_html(url, desired_compounds):
         if saved_tables == 0:
             print("Nenhuma tabela contém compostos desejados. Nenhum arquivo foi salvo.")
 
+        return saved_tables
+
     except requests.exceptions.RequestException as e:
         print(f"Erro ao acessar a página: {e}")
+        return 0
 
 
 def get_patent_links(search_url):
@@ -111,21 +114,18 @@ if __name__ == "__main__":
             patent_id = extract_patent_id_from_url(pat)
             output_dir = Path(f"data/patents/{patent_id}")
 
-            if not output_dir.exists():
-                # Cria o diretório da patente, se ainda não existir
+            # Salvar as tabelas de dados
+            saved_tables = save_raw_tables_from_html(pat, desired_compounds)
+
+            # Se pelo menos uma tabela foi salva, salvar metadados e criar o diretório
+            if saved_tables > 0:
                 output_dir.mkdir(parents=True, exist_ok=True)
-
-                # Salva as tabelas de dados
-                save_raw_tables_from_html(pat, desired_compounds)
-
-                # Cria e salva o arquivo metadata.txt
                 metadata_file_path = output_dir / "metadata.txt"
                 with open(metadata_file_path, "w") as metadata_file:
                     metadata_file.write(f"Patent URL: {pat}\n")
                     metadata_file.write(f"Page Max: {args.page_max}\n")
                     metadata_file.write(f"Keyword: {args.keyword}\n")
-
                 print(f"Metadados salvos em '{metadata_file_path}'.")
 
             else:
-                print(f"Pasta {output_dir} já existe. Pulando extração.")
+                print(f"Nenhuma tabela foi salva para a patente {patent_id}. Metadados não foram gerados.")
