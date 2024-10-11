@@ -36,7 +36,7 @@ def process_file(filepath):
 
             # Identifica a linha que deve ser removida, se tiver menos vírgulas que as outras
             # max_commas = max(comma_counts)
-            filtered_lines = [line for line in lines if line.count(",") > 1]
+            filtered_lines = [line for line in lines if line.count(",") > 2]
 
             # Verifica se ainda existem linhas válidas após a filtragem
             if filtered_lines:
