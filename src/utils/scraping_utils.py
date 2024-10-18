@@ -17,7 +17,11 @@ def search_patent_links_by_keyword_and_page(keyword, page):
     all_links = soup.find_all("a", href=True)
 
     links = [
-        {"title": link.get_text().lower(), "link": f"https://www.freepatentsonline.com{link['href']}"}
+        {
+            "id": link["href"].replace("/", "_").replace(".html", ""),
+            "title": link.get_text().lower(),
+            "link": f"https://www.freepatentsonline.com{link['href']}",
+        }
         for link in all_links
         if "glass" in link.get_text().lower()
     ]
