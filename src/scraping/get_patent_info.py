@@ -1,11 +1,12 @@
-import time
+import json
+from pathlib import Path
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-page = 5
+page = 1
 
 keywords = [
     "glass",
@@ -39,23 +40,22 @@ for patent in patent_elements:
     full_url = "https://patents.google.com/" + data_result
     all_urls.append(full_url)
 
+# Criar o diretório data/patents se ele não existir
+output_dir = Path("data/patents")
+output_dir.mkdir(parents=True, exist_ok=True)
 
 for url in all_urls:
-    print(url + "\n\n\n\n\n\n\n\n")
     # Navegar para a URL completa da patente
     browser.get(url)
 
     # Esperar até que a nova página de patente seja carregada
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
-    # Tempo de espera adicional para garantir que a página esteja totalmente carregada
-    time.sleep(2)
-
     # Função auxiliar para verificar a existência de elementos
     def get_meta_content(selector):
         elements = browser.find_elements(By.CSS_SELECTOR, selector)
         if elements:
-            return elements[0].get_attribute("content")
+            return elements[0].get_attribute("content").strip()
         return None
 
     # Capturar os dados com base na presença dos elementos
@@ -74,18 +74,27 @@ for url in all_urls:
     assignee = get_meta_content("meta[scheme='assignee']")
     date = get_meta_content("meta[name='DC.date']")
 
-    # Imprimir os dados coletados
-    print(f"URL: {url}")
-    print(f"Título: {title}")
-    print(f"Tipo: {patent_type}")
-    print(f"Descrição: {description}")
-    print(f"Número de Aplicação: {application_number}")
-    print(f"Número de Publicação: {publication_number}")
-    print(f"PDF URL: {pdf_url}")
-    print(f"Inventores: {', '.join(inventors) if inventors else None}")
-    print(f"Assignee: {assignee}")
-    print(f"Data: {date}")
-    print("=" * 50)
+    # Criar um dicionário com os dados
+    patent_data = {
+        "url": url,
+        "title": title,
+        "type": patent_type,
+        "description": description,
+        "application_number": application_number,
+        "publication_number": publication_number,
+        "pdf_url": pdf_url,
+        "inventors": inventors,
+        "assignee": assignee,
+        "date": date,
+    }
+
+    # Gerar o nome do arquivo com base na URL (remover caracteres inválidos)
+    file_name = url.replace("https://", "").replace(".", "_").replace("/", "_") + ".json"
+    output_file = output_dir / file_name
+
+    # Salvar os dados em um arquivo JSON
+    with output_file.open(mode="w", encoding="utf-8") as f:
+        json.dump(patent_data, f, ensure_ascii=False, indent=4)
 
 # Fechar o navegador ao final (se necessário)
 browser.quit()
