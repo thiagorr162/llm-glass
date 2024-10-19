@@ -1,8 +1,21 @@
-from src.utils.scraping_utils import search_patent_links_by_keyword_and_page
+from selenium import webdriver
 
-page = 1
-keyword = "glass refractive"
+# Definindo as palavras-chave
+keywords = [
+    "glass",
+    "refractive",
+    "table",
+]
 
-links = search_patent_links_by_keyword_and_page(keyword, page)
+# Construindo a URL de busca com múltiplos parâmetros de consulta
+search_url = "https://patents.google.com/?q=" + "&q=".join(keywords)
+search_url = search_url + "&sort=new"
 
 breakpoint()
+geckodriver_path = "/usr/local/bin/geckodriver"
+driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
+
+browser = webdriver.Firefox(service=driver_service)
+
+
+browser.get(search_url)
