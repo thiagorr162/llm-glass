@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
+from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -26,7 +28,7 @@ browser = webdriver.Firefox(service=driver_service)
 browser.get(search_url)
 
 # Definir um tempo de espera até que os resultados estejam disponíveis
-wait = WebDriverWait(browser, 15)
+wait = WebDriverWait(browser, 10)
 
 # Localizar os elementos que contêm as patentes
 patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
@@ -75,7 +77,21 @@ for url in all_urls:
     assignee = get_meta_content("meta[scheme='assignee']")
     date = get_meta_content("meta[name='DC.date']")
 
-    breakpoint()
+    patent_tables = browser.find_elements(By.CSS_SELECTOR, "patent-tables")
+    try:
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "patent-tables table")))
+        print("Tables found!")
+        html_tables = []
+
+        for table in patent_tables:
+            patent_table_html = table.get_attribute("outerHTML")
+            soup = BeautifulSoup(patent_table_html, "html.parser")
+
+            html_tables.append(soup)
+    except TimeoutException:
+        print(f"No patent tables found on {url}.")
+        html_tables = None
+
     # Criar um dicionário com os dados
     patent_data = {
         "url": url,
@@ -88,6 +104,7 @@ for url in all_urls:
         "inventors": inventors,
         "assignee": assignee,
         "date": date,
+        "html_tables": html_tables,
     }
 
     # Gerar o nome do arquivo com base na URL (remover caracteres inválidos)
@@ -97,6 +114,7 @@ for url in all_urls:
     # Salvar os dados em um arquivo JSON
     with output_file.open(mode="w", encoding="utf-8") as f:
         json.dump(patent_data, f, ensure_ascii=False, indent=4)
+
 
 # Fechar o navegador ao final (se necessário)
 browser.quit()
