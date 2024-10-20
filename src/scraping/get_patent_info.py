@@ -55,7 +55,11 @@ for url in all_urls:
     def get_meta_content(selector):
         elements = browser.find_elements(By.CSS_SELECTOR, selector)
         if elements:
-            return elements[0].get_attribute("content").strip()
+            result = [element.get_attribute("content").strip() for element in elements]
+            if len(result) == 1:
+                return result[0]
+            else:
+                return result
         return None
 
     # Capturar os dados com base na presença dos elementos
@@ -67,13 +71,11 @@ for url in all_urls:
     pdf_url = get_meta_content("meta[name='citation_pdf_url']")
 
     # Para inventores, retornar uma lista de nomes
-    inventors = [
-        element.get_attribute("content")
-        for element in browser.find_elements(By.CSS_SELECTOR, "meta[scheme='inventor']")
-    ] or None
+    inventors = get_meta_content("meta[scheme='inventor']")
     assignee = get_meta_content("meta[scheme='assignee']")
     date = get_meta_content("meta[name='DC.date']")
 
+    breakpoint()
     # Criar um dicionário com os dados
     patent_data = {
         "url": url,
