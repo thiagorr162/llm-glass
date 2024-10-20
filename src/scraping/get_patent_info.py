@@ -30,10 +30,20 @@ parser.add_argument(
     default=["glass", "refractive"],
     help="Lista de palavras-chave para busca (default: ['glass', 'refractive'])",
 )
+parser.add_argument(
+    "--country",
+    "-c",
+    default=None,
+    help="Country to get patents. (default: None, get patent for any country.)",
+)
+
+
 args = parser.parse_args()
 
 keywords = args.keywords
 pages = args.pages
+
+country = args.country
 
 all_urls = []
 
@@ -51,6 +61,10 @@ for page in range(0, pages + 1):
     )
     search_url = search_url + "&sort=new"
     search_url = search_url + f"&page={page}"
+
+    if args.country is not None:
+        country = country.upper()
+        search_url = search_url + f"&country={country}"
 
     browser.get(search_url)
 
