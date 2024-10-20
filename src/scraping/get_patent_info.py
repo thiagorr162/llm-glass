@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-page = 1
+page = 2
 
 keywords = [
     "glass",
@@ -47,6 +47,14 @@ output_dir = Path("data/patents")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 for url in all_urls:
+    file_name = url.replace("https://", "").replace(".", "_").replace("/", "_") + ".json"
+    output_file = output_dir / file_name
+
+    # Verificar se o arquivo já existe
+    if output_file.exists():
+        print(f"Arquivo {output_file} já existe. Pulando a criação.")
+        continue
+
     # Navegar para a URL completa da patente
     browser.get(url)
 
@@ -77,20 +85,19 @@ for url in all_urls:
     assignee = get_meta_content("meta[scheme='assignee']")
     date = get_meta_content("meta[name='DC.date']")
 
-    patent_tables = browser.find_elements(By.CSS_SELECTOR, "patent-tables")
     try:
         wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "patent-tables table")))
-        print("Tables found!")
+        patent_tables = browser.find_elements(By.CSS_SELECTOR, "patent-tables")
         html_tables = []
 
         for table in patent_tables:
             patent_table_html = table.get_attribute("outerHTML")
-            soup = BeautifulSoup(patent_table_html, "html.parser")
+            soup = BeautifulSoup(patent_table_html, "html.parser").prettify()
 
             html_tables.append(soup)
     except TimeoutException:
         print(f"No patent tables found on {url}.")
-        html_tables = None
+        html_tables = []
 
     # Criar um dicionário com os dados
     patent_data = {
@@ -108,8 +115,6 @@ for url in all_urls:
     }
 
     # Gerar o nome do arquivo com base na URL (remover caracteres inválidos)
-    file_name = url.replace("https://", "").replace(".", "_").replace("/", "_") + ".json"
-    output_file = output_dir / file_name
 
     # Salvar os dados em um arquivo JSON
     with output_file.open(mode="w", encoding="utf-8") as f:
