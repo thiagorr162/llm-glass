@@ -1,3 +1,4 @@
+import argparse
 import json
 from pathlib import Path
 
@@ -8,39 +9,65 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-page = 2
+parser = argparse.ArgumentParser(
+    description="Busca de patentes no Google Patents com base em palavras-chave e número de páginas."
+)
 
-keywords = [
-    "glass",
-    "refractive",
-]
+# Argumento para o número de páginas
+parser.add_argument(
+    "--pages",
+    "-p",
+    type=int,
+    default=2,
+    help="Número de páginas para procurar (default: 2)",
+)
 
-# Construindo a URL de busca com múltiplos parâmetros de consulta
-search_url = "https://patents.google.com/?q=" + "&q=".join([f"TI%3d({keyword})" for keyword in keywords]) + "&sort=new"
-search_url = search_url + "&sort=new"
-search_url = search_url + f"&page={page}"
+# Argumento para as palavras-chave
+parser.add_argument(
+    "--keywords",
+    "-k",
+    nargs="+",
+    default=["glass", "refractive"],
+    help="Lista de palavras-chave para busca (default: ['glass', 'refractive'])",
+)
+args = parser.parse_args()
+
+keywords = args.keywords
+pages = args.pages
+
+all_urls = []
 
 geckodriver_path = "/usr/local/bin/geckodriver"
 driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
 
 browser = webdriver.Firefox(service=driver_service)
 
-browser.get(search_url)
+for page in range(0, pages + 1):
+    print(f"Getting links for page: {page}")
 
-# Definir um tempo de espera até que os resultados estejam disponíveis
-wait = WebDriverWait(browser, 10)
+    # Construindo a URL de busca com múltiplos parâmetros de consulta
+    search_url = (
+        "https://patents.google.com/?q=" + "&q=".join([f"TI%3d({keyword})" for keyword in keywords]) + "&sort=new"
+    )
+    search_url = search_url + "&sort=new"
+    search_url = search_url + f"&page={page}"
 
-# Localizar os elementos que contêm as patentes
-patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
+    browser.get(search_url)
 
-all_urls = []
+    # Definir um tempo de espera até que os resultados estejam disponíveis
+    wait = WebDriverWait(browser, 10)
 
-# Capturar os URLs das patentes
-for patent in patent_elements:
-    state_modifier = patent.find_element(By.CSS_SELECTOR, "state-modifier")
-    data_result = state_modifier.get_attribute("data-result")
-    full_url = "https://patents.google.com/" + data_result
-    all_urls.append(full_url)
+    # Localizar os elementos que contêm as patentes
+    patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
+
+    # Capturar os URLs das patentes
+    for patent in patent_elements:
+        state_modifier = patent.find_element(By.CSS_SELECTOR, "state-modifier")
+        data_result = state_modifier.get_attribute("data-result")
+        full_url = "https://patents.google.com/" + data_result
+        all_urls.append(full_url)
+
+print("All links done!\n")
 
 # Criar o diretório data/patents se ele não existir
 output_dir = Path("data/patents")
