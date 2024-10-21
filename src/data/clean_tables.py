@@ -1,8 +1,15 @@
 import csv
 import json
+import re
+import unicodedata
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+
+
+def normalize_string(s):
+    """Normaliza as strings removendo acentos e convertendo para minúsculas."""
+    return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("utf-8").lower())
 
 
 def html_table_to_list(table):
@@ -19,10 +26,21 @@ def html_table_to_list(table):
     return table_data
 
 
+properties_file = Path("json/properties.json")
+
+with properties_file.open(encoding="utf-8") as f:
+    properties_data = json.load(f)
+    desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
+
+
 # Definir o caminho para a pasta dos JSONs e de saída para as tabelas
 json_folder = Path("data/patents")
-output_folder = Path("data/tables")
-output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
+
+desired_output_folder = Path("data/processed/desired")
+non_desired_output_folder = Path("data/processed/non_desired")
+desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
+non_desired_output_folder.mkdir(parents=True, exist_ok=True)
+
 
 # Iterar sobre todos os arquivos JSON na pasta
 for json_file in json_folder.glob("*.json"):
@@ -52,12 +70,25 @@ for json_file in json_folder.glob("*.json"):
 
             table_data = html_table_to_list(patent_table)
 
+            contains_desired = False
+            for row in table_data:
+                for cell in row:
+                    normalized_cell = normalize_string(cell)
+                    if any(desired in normalized_cell for desired in desired_compounds):
+                        contains_desired = True
+                        break
+                if contains_desired:
+                    break
+
             # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
-            output_file = output_folder / f"{json_file.stem}_table_{idx}.csv"
+            if contains_desired:
+                output_file = desired_output_folder / f"{json_file.stem}_table_{idx}.csv"
+            else:
+                output_file = non_desired_output_folder / f"{json_file.stem}_table_{idx}.csv"
 
             # Salvar a tabela como CSV
             with output_file.open(mode="w", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file)
+                writer = csv.writer(file, delimiter=",")
                 writer.writerows(table_data)
 
             print(f"Tabela salva em {output_file}")
