@@ -50,22 +50,17 @@ for json_file in json_folder.glob("*.json"):
         if patent_table_elements:
             patent_table = patent_table_elements[0]
 
-            # Encontrar as tabelas dentro de <patent-tables>
-            tables = patent_table.find_all("table")
+            table_data = html_table_to_list(patent_table)
 
-            # Processar cada tabela
-            for i, table in enumerate(tables, start=1):
-                table_data = html_table_to_list(table)
+            # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
+            output_file = output_folder / f"{json_file.stem}_table_{idx}.csv"
 
-                # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
-                output_file = output_folder / f"{json_file.stem}_table_{idx}_{i}.csv"
+            # Salvar a tabela como CSV
+            with output_file.open(mode="w", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                writer.writerows(table_data)
 
-                # Salvar a tabela como CSV
-                with output_file.open(mode="w", newline="", encoding="utf-8") as file:
-                    writer = csv.writer(file)
-                    writer.writerows(table_data)
-
-                print(f"Tabela salva em {output_file}")
+            print(f"Tabela salva em {output_file}")
         else:
             print(f"Nenhuma tag <patent-tables> encontrada no arquivo {json_file.name}")
             breakpoint()
