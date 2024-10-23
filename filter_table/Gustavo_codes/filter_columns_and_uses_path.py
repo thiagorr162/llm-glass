@@ -180,3 +180,5 @@ for category, colunas in new_columns.items():
     print(f"\nValores da categoria '{category}':")
     for coluna, valores in colunas.items():
         print(f"{coluna}: {valores}")
+
+print(Colunas1)
