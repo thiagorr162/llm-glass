@@ -9,6 +9,14 @@ def normalize_string(s):
     return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("utf-8").lower())
 
 
+def check_if_desired(text):
+    normalized_t = normalize_string(text)
+    if any(desired in normalized_t for desired in desired_compounds):
+        return True
+    else:
+        return False
+
+
 input_path = pathlib.Path("data/tables/desired")
 output_path = pathlib.Path("data/processed/has_compounds")
 output_path.mkdir(parents=True, exist_ok=True)
@@ -31,12 +39,20 @@ for table_file in input_path.rglob("*.csv"):
     correct_tables = []
 
     for t in all_tables:
-        normalized_t = normalize_string(t)
+        if check_if_desired(t):
+            correct_tables.append(t)
 
-        if any(desired in normalized_t for desired in desired_compounds):
-            correct_tables.append(t.strip())
+    glass_examples = []
 
     for i, t in enumerate(correct_tables):
+        if t.lower().count("exemp") > 1:
+            all_examples = t.lower().split("exemp")
+
+            for ex in all_examples:
+                if check_if_desired(ex):
+                    glass_examples.append(ex)
+
+    for i, t in enumerate(glass_examples):
         output_file = output_path / (f"{table_file.stem}_{i}.csv")
 
         with open(output_file, mode="w", encoding="utf-8") as file:
