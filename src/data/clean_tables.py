@@ -36,8 +36,8 @@ with properties_file.open(encoding="utf-8") as f:
 # Definir o caminho para a pasta dos JSONs e de saída para as tabelas
 json_folder = Path("data/patents")
 
-desired_output_folder = Path("data/processed/desired")
-non_desired_output_folder = Path("data/processed/non_desired")
+desired_output_folder = Path("data/tables/desired")
+non_desired_output_folder = Path("data/tables/non_desired")
 desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
 non_desired_output_folder.mkdir(parents=True, exist_ok=True)
 
