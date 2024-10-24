@@ -8,6 +8,8 @@
 /out
 /personal
 /visualization
+/.vscode
+/
 
 # Python stuff
 *.ipynb_checkpoints/
