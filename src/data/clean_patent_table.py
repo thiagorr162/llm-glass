@@ -51,6 +51,8 @@ for table_file in input_path.rglob("*.csv"):
             for ex in all_examples:
                 if check_if_desired(ex):
                     glass_examples.append(ex)
+        else:
+            glass_examples = correct_tables.copy()
 
     for i, t in enumerate(glass_examples):
         output_file = output_path / (f"{table_file.stem}_{i}.csv")
