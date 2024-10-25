@@ -39,10 +39,16 @@ parser.add_argument(
 parser.add_argument(
     "--country",
     "-c",
+    type=str,
     default=None,
     help="Country to get patents. (default: None, get patent for any country.)",
 )
-
+parser.add_argument(
+    "--selenium_path",
+    type=str,
+    default="/usr/local/bin/geckodriver",
+    help="Path to selenium driver.",
+)
 
 args = parser.parse_args()
 
@@ -53,7 +59,7 @@ country = args.country
 
 all_urls = []
 
-geckodriver_path = "/usr/local/bin/geckodriver"
+geckodriver_path = args.selenium_path
 driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
 
 browser = webdriver.Firefox(service=driver_service)
