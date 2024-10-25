@@ -55,7 +55,7 @@ for table_file in input_path.rglob("*.csv"):
             glass_examples = correct_tables.copy()
 
     for i, t in enumerate(glass_examples):
-        output_file = output_path / (f"{table_file.stem}_{i}.csv")
+        output_file = output_path / (f"{table_file.stem}-{i}.csv")
 
         with open(output_file, mode="w", encoding="utf-8") as file:
             file.write(t)

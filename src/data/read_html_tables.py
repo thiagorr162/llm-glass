@@ -82,9 +82,9 @@ for json_file in json_folder.glob("*.json"):
 
             # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
             if contains_desired:
-                output_file = desired_output_folder / f"{json_file.stem}_table_{idx}.csv"
+                output_file = desired_output_folder / f"{json_file.stem}-table_{idx}.csv"
             else:
-                output_file = non_desired_output_folder / f"{json_file.stem}_table_{idx}.csv"
+                output_file = non_desired_output_folder / f"{json_file.stem}-table_{idx}.csv"
 
             # Salvar a tabela como CSV
             with output_file.open(mode="w", newline="", encoding="utf-8") as file:
