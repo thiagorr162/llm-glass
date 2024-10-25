@@ -17,9 +17,7 @@ def check_if_desired(text):
         return False
 
 
-input_path = pathlib.Path("data/tables/desired")
-output_path = pathlib.Path("data/processed/splitted")
-output_path.mkdir(parents=True, exist_ok=True)
+input_path = pathlib.Path("data/patents")
 
 properties_file = pathlib.Path("json/properties.json")
 
@@ -28,7 +26,7 @@ with properties_file.open(encoding="utf-8") as f:
     desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
 
 
-for table_file in input_path.rglob("*.csv"):
+for table_file in input_path.rglob("*/desired/*.csv"):
     with open(table_file, "r") as f:
         txt_table = f.read()
 
@@ -53,6 +51,9 @@ for table_file in input_path.rglob("*.csv"):
                     glass_examples.append(ex)
         else:
             glass_examples = correct_tables.copy()
+
+    output_path = table_file.parents[2] / "processed/splitted"
+    output_path.mkdir(exist_ok=True, parents=True)
 
     for i, t in enumerate(glass_examples):
         output_file = output_path / (f"{table_file.stem}-{i}.csv")
