@@ -21,8 +21,6 @@ def check_if_desired(text):
 
 input_path = pathlib.Path("data/patents")
 
-output_path = pathlib.Path("data/processed/cleaned")
-output_path.mkdir(parents=True, exist_ok=True)
 
 properties_file = pathlib.Path("json/properties.json")
 
