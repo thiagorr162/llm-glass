@@ -88,8 +88,12 @@ output_dir = Path("data/patents")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 for url in all_urls:
-    file_name = url.replace("https://", "").replace(".", "_").replace("/", "_") + ".json"
-    output_file = output_dir / file_name
+    file_name = url.replace("https://", "").replace(".", "_").replace("/", "_")
+
+    output_path = output_dir / file_name
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    output_file = output_path / (file_name + ".json")
 
     # Verificar se o arquivo já existe
     if output_file.exists():
