@@ -36,14 +36,9 @@ with properties_file.open(encoding="utf-8") as f:
 # Definir o caminho para a pasta dos JSONs e de saída para as tabelas
 json_folder = Path("data/patents")
 
-desired_output_folder = Path("data/tables/desired")
-non_desired_output_folder = Path("data/tables/non_desired")
-desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
-non_desired_output_folder.mkdir(parents=True, exist_ok=True)
-
 
 # Iterar sobre todos os arquivos JSON na pasta
-for json_file in json_folder.glob("*.json"):
+for json_file in json_folder.rglob("*.json"):
     # Abrir e ler o arquivo JSON
     with json_file.open(encoding="utf-8") as f:
         data = json.load(f)
@@ -79,6 +74,12 @@ for json_file in json_folder.glob("*.json"):
                         break
                 if contains_desired:
                     break
+
+            desired_output_folder = json_file.parent / "tables" / "desired"
+            desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
+
+            non_desired_output_folder = json_file.parent / "tables" / "not_desired"
+            non_desired_output_folder.mkdir(parents=True, exist_ok=True)
 
             # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
             if contains_desired:
