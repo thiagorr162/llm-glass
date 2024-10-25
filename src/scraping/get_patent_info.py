@@ -21,7 +21,13 @@ parser.add_argument(
     default=2,
     help="Número de páginas para procurar (default: 2)",
 )
-
+parser.add_argument(
+    "--wait",
+    "-w",
+    type=int,
+    default=10,
+    help="Seconds to wait to load patents.",
+)
 # Argumento para as palavras-chave
 parser.add_argument(
     "--keywords",
@@ -69,7 +75,7 @@ for page in range(0, pages + 1):
     browser.get(search_url)
 
     # Definir um tempo de espera até que os resultados estejam disponíveis
-    wait = WebDriverWait(browser, 10)
+    wait = WebDriverWait(browser, args.wait)
 
     # Localizar os elementos que contêm as patentes
     patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
