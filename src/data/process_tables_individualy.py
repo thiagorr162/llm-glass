@@ -19,7 +19,7 @@ def check_if_desired(text):
         return False
 
 
-input_path = pathlib.Path("data/processed/splitted")
+input_path = pathlib.Path("data/patents")
 
 output_path = pathlib.Path("data/processed/cleaned")
 output_path.mkdir(parents=True, exist_ok=True)
@@ -31,7 +31,7 @@ with properties_file.open(encoding="utf-8") as f:
     desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
 
 
-for table_file in input_path.rglob("*.csv"):
+for table_file in input_path.rglob("*/processed/splitted/*.csv"):
     try:
         df = pd.read_csv(table_file, header=None)
         df = df.dropna(axis=1, how="all")
@@ -54,10 +54,15 @@ for table_file in input_path.rglob("*.csv"):
         new_df = df[header_idx:].copy()
         new_df.columns = new_header
 
-        breakpoint()
+        output_path = table_file.parents[1] / "dataframe"
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        new_df.to_csv(output_path / (table_file.stem + ".csv"), index=False)
+
     except pd.errors.ParserError:
-        with open(table_file, "r") as f:
-            txt_table = f.read()
+        print(f"error parsing with pandas:{table_file}")
+        # with open(table_file, "r") as f:
+        #     txt_table = f.read()
 
     # all_tables = txt_table.split("\n\n")
 
