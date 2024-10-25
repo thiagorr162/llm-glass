@@ -7,7 +7,7 @@ Aqui descrevemos como rodar os códigos para coleta de dados de patentes de vidr
 Para iniciar, execute o seguinte comando:
 
 ```
-python src/scraping/get_patent_info.py -c {country} -w {wait} -p {n_pages} -k ["glass", "refractive"]
+python src/scraping/get_patent_info.py -c {country} -w {wait} -p {n_pages} -k ["glass", "refractive"] --selenium_path {path_to_selenium_driver}
 ```
 
 
@@ -17,6 +17,7 @@ Este script irá realizar o download de patentes diretamente do Google Patents, 
 - **Tempo de espera entre requisições**: ajustável com o parâmetro `{wait}`
 - **Número máximo de páginas**: configurado por `{n_pages}`
 - **Palavras-chave**: como "glass" e "refractive", que podem ser adaptadas conforme necessário.
+- **Diretório para driver do Selenium**: aqui você precisa dizer onde está o webdriver executável defindo em `{path_to_selenium_driver}`. 
 
 ## Procesando as patentes
 
