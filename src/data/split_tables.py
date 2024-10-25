@@ -18,7 +18,7 @@ def check_if_desired(text):
 
 
 input_path = pathlib.Path("data/tables/desired")
-output_path = pathlib.Path("data/processed/has_compounds")
+output_path = pathlib.Path("data/processed/splitted")
 output_path.mkdir(parents=True, exist_ok=True)
 
 properties_file = pathlib.Path("json/properties.json")
