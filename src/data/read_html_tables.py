@@ -75,10 +75,10 @@ for json_file in json_folder.rglob("*.json"):
                 if contains_desired:
                     break
 
-            desired_output_folder = json_file.parent / "tables" / "desired"
+            desired_output_folder = json_file.parent / "tables" / "good_tables"
             desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
 
-            non_desired_output_folder = json_file.parent / "tables" / "not_desired"
+            non_desired_output_folder = json_file.parent / "tables" / "bad_tables"
             non_desired_output_folder.mkdir(parents=True, exist_ok=True)
 
             # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
