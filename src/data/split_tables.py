@@ -26,11 +26,13 @@ with properties_file.open(encoding="utf-8") as f:
     desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
 
 
-for table_file in input_path.rglob("*/desired/*.csv"):
+for table_file in input_path.rglob("*/good_tables/*.csv"):
     with open(table_file, "r") as f:
         txt_table = f.read()
 
     txt_table = txt_table.replace('""', "")
+
+    txt_table = txt_table.replace(",,", ",-,")
 
     all_tables = txt_table.split("\n\n")
 
@@ -58,5 +60,8 @@ for table_file in input_path.rglob("*/desired/*.csv"):
     for i, t in enumerate(glass_examples):
         output_file = output_path / (f"{table_file.stem}-{i}.csv")
 
+        # Filtrando linhas com mais de uma vírgula antes de salvar
+        filtered_lines = "\n".join(line for line in t.splitlines() if line.count(",") > 1)
+
         with open(output_file, mode="w", encoding="utf-8") as file:
-            file.write(t)
+            file.write(filtered_lines)
