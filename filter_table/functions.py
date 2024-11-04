@@ -69,15 +69,13 @@ def Filter_by_not_plus(dataframe):
     excluded_columns = dataframe.columns.difference(filtered_columns)
     return dataframe[filtered_columns], dataframe[excluded_columns]
 
-import pandas as pd
-
 def insert_zeros(dataframe):
     """
     Cleans the DataFrame by replacing '—' and NaN with 0.
     """
-    dataframe = dataframe.replace('—', pd.NA).fillna(0)
-    return dataframe.apply(pd.to_numeric, errors='coerce').fillna(0)
-
+    dataframe = dataframe.replace('—', 0).fillna(0)
+    dataframe = dataframe.apply(pd.to_numeric, errors='coerce').fillna(0)
+    return dataframe
 
 def remove_empty_columns(dataframe):
     """
@@ -162,3 +160,5 @@ print("Dataframe das colunas nulas excluídas pelo filtro:\n", null_columns)
 print("Dataframe das colunas excluídas por ter +:\n", has_plus)
 print("Dataframe das linhas de compostos excluídas por não somarem entre 98 e 102:\n", sum_not_100)
 print("Dataframe das colunas excluídas que não são nem compostos nem propriedades:\n", excluded)
+
+# a fazer: descobrir pq volta a aparecer NaN no final_df, de resto parece estar funcionando
