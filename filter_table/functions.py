@@ -2,16 +2,15 @@ import json
 import pandas as pd
 from pathlib import Path  
 import re
-#teste
+
 base_path = Path("data/raw")
 
 csv_path1 = base_path / "final_filtered_concatenated.csv"
 csv_path2 = base_path / "refractiveIndex.csv"
 csv_path3 = base_path / "merged_df.csv"
-
-dataframe1 = pd.read_csv(csv_path1)
-dataframe2 = pd.read_csv(csv_path2)
-dataframe3 = pd.read_csv(csv_path3)
+dataframe1 = pd.read_csv(csv_path1, low_memory=False)
+dataframe2 = pd.read_csv(csv_path2, low_memory=False)
+dataframe3 = pd.read_csv(csv_path3, low_memory=False)
 
 json_path =  Path("json/properties.json")
 
@@ -19,88 +18,147 @@ with open(json_path, 'r') as file:
     data = json.load(file)
 
 def Filter_By_Compounds(dataframe):
-    lista=[]
+    """
+    Returns
+    - Filtered DataFrame with desired compounds.
+    - Excluded DataFrame with columns not in the desired compounds list.
+    """
     desired_compounds = data["desired_compounds"]
-    for i in list(dataframe.columns):
-        if i in desired_compounds:
-            lista.append(i)
-    return dataframe[lista]
+    filtered_columns = [col for col in dataframe.columns if col in desired_compounds]
+    excluded_columns = dataframe.columns.difference(filtered_columns)
+    return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def Filter_by_have_numbers(dataframe):
-    columns_list_dataframe = list(dataframe.columns)
-    lista=[]
-    for i in columns_list_dataframe:
-        a=re.findall(r'\d+', i)
-        if a:
-            lista.append(i)
-    return dataframe[lista]
+    """
+    Returns:
+    - Filtered DataFrame with columns containing numbers.
+    - Excluded DataFrame with columns that do not contain numbers.
+    """
+    filtered_columns = [col for col in dataframe.columns if re.search(r'\d+', col)]
+    excluded_columns = dataframe.columns.difference(filtered_columns)
+    return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def Filter_by_2to8(dataframe):
-    lista = []
-    columns_list_dataframe = list(dataframe.columns)
-    for i in columns_list_dataframe:
-        if 2 <= len(i) <= 8:
-            lista.append(i)
-    return dataframe[lista]
+    """
+    Returns:
+    - Filtered DataFrame with columns that have names between 2 and 8 characters.
+    - Excluded DataFrame with columns that do not match this length criteria.
+    """
+    filtered_columns = [col for col in dataframe.columns if 2 <= len(col) <= 8]
+    excluded_columns = dataframe.columns.difference(filtered_columns)
+    return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def Pull_Apart_Compoundsdataframe_NotCompoundsdataframe(dataframe):
-    dataframe_with_numbers=Filter_by_have_numbers(dataframe)
-    dataframe_with_compounds=Filter_by_2to8(dataframe_with_numbers)
-    dataframe_without_compounds=dataframe_with_compounds.columns.difference(dataframe.columns)
-    return dataframe_with_compounds , dataframe_without_compounds
+    """
+    Returns:
+    - Filtered DataFrame with columns that meet compound criteria (numbers present, 2-8 characters).
+    - Excluded DataFrame with columns that do not meet the criteria.
+    """
+    dataframe_with_numbers, _ = Filter_by_have_numbers(dataframe)
+    dataframe_with_compounds, _ = Filter_by_2to8(dataframe_with_numbers)
+    excluded_columns = dataframe.columns.difference(dataframe_with_compounds.columns)
+    return dataframe_with_compounds, dataframe[excluded_columns]
 
 def Filter_by_not_plus(dataframe):
-    lista=[]
-    for i in dataframe.columns:
-        if "+" not in i:
-            lista.append(i)
-    return dataframe[lista]
+    """
+    Returns:
+    - Filtered DataFrame with columns that do not contain the '+' character.
+    - Excluded DataFrame with columns that contain the '+' character.
+    """
+    filtered_columns = [col for col in dataframe.columns if "+" not in col]
+    excluded_columns = dataframe.columns.difference(filtered_columns)
+    return dataframe[filtered_columns], dataframe[excluded_columns]
+
+import pandas as pd
 
 def insert_zeros(dataframe):
-    # substituir '—' por 0
-    dataframe = dataframe.replace('—', 0, inplace=True)
-    # substituir NaN por 0
-    dataframe = dataframe.fillna(0, inplace=True)
-    # converte todas as colunas para numéricas
-    dataframe = dataframe.apply(pd.to_numeric, errors='coerce').fillna(0)
-    return dataframe
+    """
+    Cleans the DataFrame by replacing '—' and NaN with 0.
+    """
+    dataframe = dataframe.replace('—', pd.NA).fillna(0)
+    return dataframe.apply(pd.to_numeric, errors='coerce').fillna(0)
+
+
+def remove_empty_columns(dataframe):
+    """
+    Returns:
+    - Filtered DataFrame without columns that contain only zeros.
+    - Excluded DataFrame with columns that contain only zeros.
+    """
+    dataframe = insert_zeros(dataframe)
+    empty_columns = dataframe.columns[(dataframe == 0).all()]
+    excluded_columns_df = dataframe[empty_columns]
+    filtered_dataframe = dataframe.drop(columns=empty_columns)
+    return filtered_dataframe, excluded_columns_df
 
 def sum_lines(dataframe, tolerance=2):
-    # soma das linhas que contem os elementos desejados
-    filtered_dataframe=Filter_By_Compounds(dataframe)
-    columns=filtered_dataframe.columns
-    soma_linhas = dataframe[columns].sum(axis=1)
-    # linhas que somam 100
-    linhas_que_somam_100 = dataframe[(soma_linhas >= 100 - tolerance) & (soma_linhas <= 100 + tolerance)]
-    return linhas_que_somam_100
+    """
+    Returns:
+    - Filtered DataFrame with rows whose sum is close to 100.
+    - Excluded DataFrame with rows whose sum is not within the tolerance range of 100.
+    """
+    filtered_dataframe, _ = Filter_By_Compounds(dataframe)
+    columns = filtered_dataframe.columns
+    row_sums = dataframe[columns].sum(axis=1)
+    rows_with_sum_100 = dataframe[(row_sums >= 100 - tolerance) & (row_sums <= 100 + tolerance)]
+    excluded_rows = dataframe.drop(rows_with_sum_100.index)
+    return rows_with_sum_100, excluded_rows
 
 def filter_by_properties(dataframe):
-    # lista de propriedades
-    propriedades = ["refractive", "abbe", "liquidus", "c.", "density", "α", "modulus", "fiber", "devitrification",
-                "point", "crystallization", "thermal", "mean", "glass transition", "crystallinity", "electric",
-                "onset", "transition", "permittivity", "iso"]
+    """
+    Returns:
+    - Filtered DataFrame with columns containing specified properties.
+    - Excluded DataFrame with columns that do not contain specified properties.
+    """
+    properties = ["refractive", "abbe", "liquidus", "c.", "density", "α", "modulus", "fiber", "devitrification",
+                  "point", "crystallization", "thermal", "mean", "glass transition", "crystallinity", "electric",
+                  "onset", "transition", "permittivity", "iso"]
+    filtered_columns = [col for col in dataframe.columns if any(prop.lower() in col.lower() for prop in properties)]
+    excluded_columns = dataframe.columns.difference(filtered_columns)
+    return dataframe[filtered_columns], dataframe[excluded_columns]
 
-    # colunas com alguma das propriedades
-    properties_columns = [col for col in dataframe.columns if any(prop.lower() in col.lower() for prop in propriedades)]
-    return dataframe[properties_columns]
-    
 def dataframe_sum_and_properties(dataframe):
-    #dataframe com as linhas que somam 100 e as colunas de elementos desejados
-    filtered_dataframe=Filter_By_Compounds(dataframe)
-    linhas_que_somam_100=sum_lines(dataframe)
-    properties_columns=filter_by_properties(dataframe).columns
-    dataframe_filtered = filtered_dataframe.loc[linhas_que_somam_100.index]
-    #soma das linhas das propriedades
-    soma_linhas_propriedades = dataframe[properties_columns].sum(axis=1)
-    nao_nulas = dataframe[soma_linhas_propriedades != 0]
-    #adicionando as colunas de propriedades no final
-    dataframe_final = pd.concat([dataframe_filtered, dataframe[properties_columns].loc[nao_nulas.index]], axis=1)
-    return dataframe_final
+    """
+    Returns:
+    - Filtered DataFrame with rows summing to 100 and columns of specified properties.
+    - Excluded DataFrame with rows not meeting the criteria.
+    """
+    filtered_dataframe, _ = Filter_By_Compounds(dataframe)
+    rows_with_sum_100, _ = sum_lines(dataframe)
+    properties_columns, _ = filter_by_properties(dataframe)
+    filtered_data = filtered_dataframe.loc[rows_with_sum_100.index]
+    properties_non_null = dataframe[properties_columns].sum(axis=1) != 0
+    final_filtered = pd.concat([filtered_data, dataframe[properties_columns].loc[properties_non_null]], axis=1)
+    excluded_rows = dataframe.drop(rows_with_sum_100.index)
+    return final_filtered, excluded_rows
 
-    # a fazer: converter os elementos que não estãoe em % para %, juntar colunas iguais, dar uma olhada para ver se tem algo estranho
-    # descobrir pq tem varias linhas NaN nas colunas de propriedades
+def all_filters(dataframe):
+    """
+    Returns
+    - Final Filtered DataFrame
+    - Final Excluded DataFrame
+    """
 
-teste=Filter_by_have_numbers(dataframe3)
-teste=Filter_by_2to8(dataframe3)
-teste=Pull_Apart_Compoundsdataframe_NotCompoundsdataframe(dataframe3)
-print(teste)
+    # normaliza o dataframe para podermos usar os demais filtros
+    dataframe = insert_zeros(dataframe)
+    dataframe, null_columns = remove_empty_columns(dataframe)
+    dataframe, has_plus = Filter_by_not_plus(dataframe)
+
+    # utiliza os filtros para chegar na versão filtrada final do dataframe
+    compounds, not_compounds = Filter_By_Compounds(dataframe)
+    # o filtro das linhas somarem 100 deve incidir somente no df que contem apenas compostos
+    compounds, sum_not_100 = sum_lines(compounds)
+    properties, not_properties = filter_by_properties(dataframe)
+    # excluidos que não são nem compostos nem propriedades
+    excluded = pd.concat([not_compounds, not_properties]).drop_duplicates()
+    final_filtered_dataframe = pd.concat([compounds, properties], axis=1)
+    return final_filtered_dataframe, null_columns, has_plus, sum_not_100, excluded
+
+# teste do filtro final thomaz
+final_df, null_columns, has_plus, sum_not_100, excluded = all_filters(dataframe3)
+
+print("Dataframe final:\n", final_df)
+print("Dataframe das colunas nulas excluídas pelo filtro:\n", null_columns)
+print("Dataframe das colunas excluídas por ter +:\n", has_plus)
+print("Dataframe das linhas de compostos excluídas por não somarem entre 98 e 102:\n", sum_not_100)
+print("Dataframe das colunas excluídas que não são nem compostos nem propriedades:\n", excluded)
