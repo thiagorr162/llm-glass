@@ -137,20 +137,30 @@ def all_filters(dataframe):
     - Final Excluded DataFrame
     """
 
-    # normaliza o dataframe para podermos usar os demais filtros
+    # Normaliza o dataframe para podermos usar os demais filtros
     dataframe = insert_zeros(dataframe)
     dataframe, null_columns = remove_empty_columns(dataframe)
     dataframe, has_plus = Filter_by_not_plus(dataframe)
 
-    # utiliza os filtros para chegar na versão filtrada final do dataframe
+    # Aplica o filtro de compostos
     compounds, not_compounds = Filter_By_Compounds(dataframe)
-    # o filtro das linhas somarem 100 deve incidir somente no df que contem apenas compostos
+    # O filtro das linhas somarem 100 deve incidir somente no dataframe que contém apenas compostos
     compounds, sum_not_100 = sum_lines(compounds)
+
+    # Atualiza o dataframe para conter apenas colunas que sobraram
+    dataframe = compounds
+
+    # Filtragem por propriedades no dataframe já filtrado
     properties, not_properties = filter_by_properties(dataframe)
-    # excluidos que não são nem compostos nem propriedades
+
+    # Colunas excluídas que não são compostos nem propriedades
     excluded = pd.concat([not_compounds, not_properties]).drop_duplicates()
+    
+    # Combinações finais do dataframe filtrado
     final_filtered_dataframe = pd.concat([compounds, properties], axis=1)
+    
     return final_filtered_dataframe, null_columns, has_plus, sum_not_100, excluded
+
 
 # teste do filtro final thomaz
 final_df, null_columns, has_plus, sum_not_100, excluded = all_filters(dataframe3)
@@ -160,5 +170,3 @@ print("Dataframe das colunas nulas excluídas pelo filtro:\n", null_columns)
 print("Dataframe das colunas excluídas por ter +:\n", has_plus)
 print("Dataframe das linhas de compostos excluídas por não somarem entre 98 e 102:\n", sum_not_100)
 print("Dataframe das colunas excluídas que não são nem compostos nem propriedades:\n", excluded)
-
-# a fazer: descobrir pq volta a aparecer NaN no final_df, de resto parece estar funcionando
