@@ -116,9 +116,9 @@ Filtra as colunas do DataFrame que contêm propriedades químicas ou físicas es
 - Um DataFrame filtrado contendo apenas as colunas que possuem as propriedades especificadas na lista.
 - Um DataFrame de exclusão contendo as colunas que não possuem as propriedades desejadas.
 
-### 10. `dataframe_sum_and_properties(dataframe)`
+### 10. `remove_rows_with_na(dataframe)`
 
-Esta função aplica os filtros de compostos e propriedades e, em seguida, seleciona apenas as linhas cujo somatório das colunas selecionadas esteja próximo de 100. Ela é uma combinação dos filtros `Filter_By_Compounds`, `sum_lines` e `filter_by_properties`.
+Esta função remove linhas que contenham pelo menos um valor NaN (deve ser aplicada ao final do processo de filtragem)
 
 **Parâmetros:**
 - `dataframe`: DataFrame contendo os dados a serem filtrados.
@@ -129,13 +129,14 @@ Esta função aplica os filtros de compostos e propriedades e, em seguida, selec
 
 ### 11. `all_filters(dataframe)`
 
-Esta é a função principal que aplica todos os filtros definidos nas funções anteriores em sequência. Ela normaliza os dados, aplica filtros de compostos, propriedades, soma das linhas e remove as colunas vazias. Ela retorna um DataFrame final com as colunas e linhas filtradas.
+Esta é a função principal que aplica todos os filtros definidos nas funções anteriores em sequência. Ela normaliza os dados, aplica filtros de compostos, propriedades, soma das linhas e remove colunas vazias, mantendo apenas dados relevantes para análise final.
 
 **Parâmetros:**
 - `dataframe`: DataFrame contendo os dados a serem filtrados.
 
 **Retorno:**
-- Um DataFrame filtrado final que contém apenas os compostos, propriedades e linhas com somatórios próximos de 100.
-- Um DataFrame de exclusão com as colunas que foram removidas por serem vazias, conterem `+`, ou não corresponderem a compostos e propriedades.
-- DataFrames com as colunas removidas devido a valores vazios ou que contêm `+`.
-- DataFrame com as linhas cujos somatórios não estão dentro da faixa de 98 a 102.
+- final_df: DataFrame filtrado final, contendo apenas as colunas e linhas que atendem a todos os critérios (compostos, propriedades desejadas e somatório das linhas próximo de 100).
+- excluded_empty_columns: DataFrame com as colunas removidas por serem inteiramente vazias.
+- excluded_sumlines: DataFrame com as linhas removidas devido ao somatório fora da faixa (98 a 102).
+- excluded_plus_columns: DataFrame com as colunas removidas que contêm o caractere '+' no nome.
+- excluded_rows_with_na: DataFrame com as linhas removidas devido a valores NaN
