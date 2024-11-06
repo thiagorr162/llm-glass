@@ -150,13 +150,3 @@ print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: 
 print(f"Tamanho da tabela dos excluídos pelo filtro da soma das linhas: {excluded_by_sumlines.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro de ter + no nome da col: {excluded_by_filterbynotplus.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro de remover linhas com NaN: {excluded_by_removerowswithna.shape}")
-
-
-# salvando os arquivos novos
-new_path = Path("filter_table/filtered")
-
-final_filtered.to_csv(new_path / 'final_filtered.csv', index=False)
-excluded_by_removeemptycolumns.to_csv(new_path / 'excluded_by_removeemptycolumns.csv', index=False)
-excluded_by_sumlines.to_csv(new_path / 'excluded_by_sumlines.csv', index=False)
-excluded_by_filterbynotplus.to_csv(new_path / 'excluded_by_filterbynotplus.csv', index=False)
-excluded_by_removerowswithna.to_csv(new_path / 'excluded_by_removerowswithna.csv', index=False)
