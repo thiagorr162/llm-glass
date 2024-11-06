@@ -144,6 +144,14 @@ final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_b
 
 # imprimindo o tamanho da tabela final e das tabelas excluidas
 
+filtered_path = Path("filter_table/filtered")
+
+final_filtered.to_csv                 (filtered_path / 'final_df.csv',                       index = False)
+excluded_by_removeemptycolumns.to_csv (filtered_path / 'excluded_by_removeemptycolumns.csv', index = False)
+excluded_by_sumlines.to_csv           (filtered_path / 'excluded_by_sumlines.csv',           index = False)
+excluded_by_filterbynotplus.to_csv    (filtered_path / 'excluded_by_filterbynotplus.csv',    index = False)
+excluded_by_removerowswithna.to_csv   (filtered_path / 'excluded_by_removerowswithna.csv',   index = False)
+
 print(f"Tamanho do dataframe original: {dataframe4.shape}")
 print(f"Tamanho da tabela final: {final_filtered.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: {excluded_by_removeemptycolumns.shape}")
