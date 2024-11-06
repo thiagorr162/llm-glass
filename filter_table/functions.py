@@ -161,9 +161,17 @@ def all_filters(dataframe):
     
     return final_filtered_dataframe, null_columns, has_plus, sum_not_100, excluded
 
-
 # teste do filtro final thomaz
 final_df, null_columns, has_plus, sum_not_100, excluded = all_filters(dataframe3)
+
+# salvando os arquivos novos
+new_path = Path("filter_table/filtered")
+
+final_df.to_csv(new_path / 'final_df.csv', index=False)
+null_columns.to_csv(new_path / 'null_columns.csv', index=False)
+has_plus.to_csv(new_path / 'has_plus.csv', index=False)
+sum_not_100.to_csv(new_path / 'sum_not_100.csv', index=False)
+excluded.to_csv(new_path / 'excluded.csv', index=False)
 
 print("Dataframe final:\n", final_df)
 print("Dataframe das colunas nulas excluídas pelo filtro:\n", null_columns)
