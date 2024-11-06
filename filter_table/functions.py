@@ -11,7 +11,7 @@ csv_path3 = base_path / "merged_df.csv"
 dataframe1 = pd.read_csv(csv_path1, low_memory=False)
 dataframe2 = pd.read_csv(csv_path2, low_memory=False)
 dataframe3 = pd.read_csv(csv_path3, low_memory=False)
-
+dataframe4 = pd.concat([dataframe1, dataframe3], axis=1).drop_duplicates()
 json_path =  Path("json/properties.json")
 
 with open(json_path, 'r') as file:
@@ -66,7 +66,7 @@ def Filter_by_not_plus(dataframe):
     - Excluded DataFrame with columns that contain the '+' character.
     """
     filtered_columns = [col for col in dataframe.columns if "+" not in col]
-    excluded_columns = dataframe.columns.difference(filtered_columns)
+    excluded_columns = [col for col in dataframe.columns if "+" in col]
     return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def insert_zeros(dataframe):
@@ -83,7 +83,6 @@ def remove_empty_columns(dataframe):
     - Filtered DataFrame without columns that contain only zeros.
     - Excluded DataFrame with columns that contain only zeros.
     """
-    dataframe = insert_zeros(dataframe)
     empty_columns = dataframe.columns[(dataframe == 0).all()]
     excluded_columns_df = dataframe[empty_columns]
     filtered_dataframe = dataframe.drop(columns=empty_columns)
@@ -95,8 +94,7 @@ def sum_lines(dataframe, tolerance=2):
     - Filtered DataFrame with rows whose sum is close to 100.
     - Excluded DataFrame with rows whose sum is not within the tolerance range of 100.
     """
-    filtered_dataframe, _ = Filter_By_Compounds(dataframe)
-    columns = filtered_dataframe.columns
+    columns = dataframe.columns
     row_sums = dataframe[columns].sum(axis=1)
     rows_with_sum_100 = dataframe[(row_sums >= 100 - tolerance) & (row_sums <= 100 + tolerance)]
     excluded_rows = dataframe.drop(rows_with_sum_100.index)
@@ -112,69 +110,53 @@ def filter_by_properties(dataframe):
                   "point", "crystallization", "thermal", "mean", "glass transition", "crystallinity", "electric",
                   "onset", "transition", "permittivity", "iso"]
     filtered_columns = [col for col in dataframe.columns if any(prop.lower() in col.lower() for prop in properties)]
-    excluded_columns = dataframe.columns.difference(filtered_columns)
-    return dataframe[filtered_columns], dataframe[excluded_columns]
+    filtered_dataframe = dataframe[filtered_columns]
+    excluded_dataframe = dataframe.drop(columns=filtered_columns)
+    return filtered_dataframe, excluded_dataframe
 
-def dataframe_sum_and_properties(dataframe):
+def remove_rows_with_na(dataframe):
+    """"
+    Returns:
+    - Filtered DataFrame without any rows that contain at least 1 NaN
+    - Excluded DataFrame with any rows that contain at least 1 NaN
+    """
+    filtered_df = dataframe.dropna()
+    excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
+    return filtered_df, excluded_df
+
+def all_filters(dataframe):
     """
     Returns:
     - Filtered DataFrame with rows summing to 100 and columns of specified properties.
     - Excluded DataFrame with rows not meeting the criteria.
     """
-    filtered_dataframe, _ = Filter_By_Compounds(dataframe)
-    rows_with_sum_100, _ = sum_lines(dataframe)
-    properties_columns, _ = filter_by_properties(dataframe)
-    filtered_data = filtered_dataframe.loc[rows_with_sum_100.index]
-    properties_non_null = dataframe[properties_columns].sum(axis=1) != 0
-    final_filtered = pd.concat([filtered_data, dataframe[properties_columns].loc[properties_non_null]], axis=1)
-    excluded_rows = dataframe.drop(rows_with_sum_100.index)
-    return final_filtered, excluded_rows
-
-def all_filters(dataframe):
-    """
-    Returns
-    - Final Filtered DataFrame
-    - Final Excluded DataFrame
-    """
-
-    # Normaliza o dataframe para podermos usar os demais filtros
     dataframe = insert_zeros(dataframe)
-    dataframe, null_columns = remove_empty_columns(dataframe)
-    dataframe, has_plus = Filter_by_not_plus(dataframe)
+    dataframe, excluded_by_removeemptycolumns= remove_empty_columns(dataframe)
+    filtered_dataframe, _ = Filter_By_Compounds(dataframe)
+    rows_with_sum_100, excluded_by_sumlines = sum_lines(filtered_dataframe)
+    properties_df, _ = filter_by_properties(dataframe)
+    final_filtered_withplus_and_na = pd.concat([rows_with_sum_100, properties_df], axis=1)
+    final_filtered_withna, excluded_by_filterbynotplus = Filter_by_not_plus(final_filtered_withplus_and_na)
+    final_filtered, excluded_by_removerowswithna= remove_rows_with_na(final_filtered_withna)
+    return final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna
 
-    # Aplica o filtro de compostos
-    compounds, not_compounds = Filter_By_Compounds(dataframe)
-    # O filtro das linhas somarem 100 deve incidir somente no dataframe que contém apenas compostos
-    compounds, sum_not_100 = sum_lines(compounds)
+final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe4)
 
-    # Atualiza o dataframe para conter apenas colunas que sobraram
-    dataframe = compounds
+# imprimindo o tamanho da tabela final e das tabelas excluidas
 
-    # Filtragem por propriedades no dataframe já filtrado
-    properties, not_properties = filter_by_properties(dataframe)
+print(f"Tamanho do dataframe original: {dataframe4.shape}")
+print(f"Tamanho da tabela final: {final_filtered.shape}")
+print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: {excluded_by_removeemptycolumns.shape}")
+print(f"Tamanho da tabela dos excluídos pelo filtro da soma das linhas: {excluded_by_sumlines.shape}")
+print(f"Tamanho da tabela dos excluídos pelo filtro de ter + no nome da col: {excluded_by_filterbynotplus.shape}")
+print(f"Tamanho da tabela dos excluídos pelo filtro de remover linhas com NaN: {excluded_by_removerowswithna.shape}")
 
-    # Colunas excluídas que não são compostos nem propriedades
-    excluded = pd.concat([not_compounds, not_properties]).drop_duplicates()
-    
-    # Combinações finais do dataframe filtrado
-    final_filtered_dataframe = pd.concat([compounds, properties], axis=1)
-    
-    return final_filtered_dataframe, null_columns, has_plus, sum_not_100, excluded
-
-# teste do filtro final thomaz
-final_df, null_columns, has_plus, sum_not_100, excluded = all_filters(dataframe3)
 
 # salvando os arquivos novos
 new_path = Path("filter_table/filtered")
 
-final_df.to_csv(new_path / 'final_df.csv', index=False)
-null_columns.to_csv(new_path / 'null_columns.csv', index=False)
-has_plus.to_csv(new_path / 'has_plus.csv', index=False)
-sum_not_100.to_csv(new_path / 'sum_not_100.csv', index=False)
-excluded.to_csv(new_path / 'excluded.csv', index=False)
-
-print("Dataframe final:\n", final_df)
-print("Dataframe das colunas nulas excluídas pelo filtro:\n", null_columns)
-print("Dataframe das colunas excluídas por ter +:\n", has_plus)
-print("Dataframe das linhas de compostos excluídas por não somarem entre 98 e 102:\n", sum_not_100)
-print("Dataframe das colunas excluídas que não são nem compostos nem propriedades:\n", excluded)
+final_filtered.to_csv(new_path / 'final_filtered.csv', index=False)
+excluded_by_removeemptycolumns.to_csv(new_path / 'excluded_by_removeemptycolumns.csv', index=False)
+excluded_by_sumlines.to_csv(new_path / 'excluded_by_sumlines.csv', index=False)
+excluded_by_filterbynotplus.to_csv(new_path / 'excluded_by_filterbynotplus.csv', index=False)
+excluded_by_removerowswithna.to_csv(new_path / 'excluded_by_removerowswithna.csv', index=False)
