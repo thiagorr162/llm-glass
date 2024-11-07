@@ -142,7 +142,7 @@ def all_filters(dataframe):
 
 final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe4)
 
-# imprimindo o tamanho da tabela final e das tabelas excluidas
+# imprimindo o tamanho da tabela final  e das tabelas excluidas
 
 filtered_path = Path("filter_table/filtered")
 
