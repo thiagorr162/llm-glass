@@ -144,7 +144,7 @@ final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_b
 
 # imprimindo o tamanho da tabela final  e das tabelas excluidas
 
-filtered_path = Path("filter_table/filtered")
+filtered_path = Path("src/filter/filtered_tables")
 
 final_filtered.to_csv                 (filtered_path / 'final_df.csv',                       index = False)
 excluded_by_removeemptycolumns.to_csv (filtered_path / 'excluded_by_removeemptycolumns.csv', index = False)
