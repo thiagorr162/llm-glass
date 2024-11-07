@@ -19,7 +19,7 @@ Este script irá realizar o download de patentes diretamente do Google Patents, 
 - **Palavras-chave**: como "glass" e "refractive", que podem ser adaptadas conforme necessário.
 - **Diretório para driver do Selenium**: aqui você precisa dizer onde está o webdriver executável defindo em `{path_to_selenium_driver}`. 
 
-## Procesando as patentes
+## Processando as patentes
 
 Para processar as patents, você deve rodar os seguintes códigos, nessa ordem:
 
