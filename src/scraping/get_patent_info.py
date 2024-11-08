@@ -62,7 +62,9 @@ all_urls = []
 geckodriver_path = args.selenium_path
 driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
 
-browser = webdriver.Firefox(service=driver_service)
+service = Service(executable_path=geckodriver_path)
+browser = webdriver.Firefox(service=service)
+
 
 for page in range(0, pages + 1):
     print(f"Getting links for page: {page}")
