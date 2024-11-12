@@ -11,6 +11,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+# python src/scraping/get_patent_info.py -c {country} -p {n_pages} 
+
 parser = argparse.ArgumentParser(
     description="Busca de patentes no Google Patents com base em palavras-chave e número de páginas."
 )
@@ -46,7 +48,7 @@ parser.add_argument(
 parser.add_argument(
     "--selenium_path",
     type=str,
-    default="/usr/local/bin/geckodriver",
+    default="src/scraping/geckodriver.exe",
     help="Path to selenium driver.",
 )
 
@@ -167,3 +169,4 @@ for url in all_urls:
         json.dump(patent_data, f, ensure_ascii=False, indent=4)
 
 browser.quit()
+
