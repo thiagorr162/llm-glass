@@ -27,7 +27,7 @@ with properties_file.open(encoding="utf-8") as f:
 
 
 for table_file in input_path.rglob("*/good_tables/*.csv"):
-    with open(table_file, "r") as f:
+    with open(table_file, "r", encoding="utf-8") as f:
         txt_table = f.read()
 
     txt_table = txt_table.replace('""', "")
