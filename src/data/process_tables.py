@@ -61,10 +61,10 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
         output_path.mkdir(parents=True, exist_ok=True)
 
         new_df.to_csv(output_path / (table_file.stem + ".csv"), index=False)
-        print(f"Arquivo processado e salvo em: {output_path}")
+        print(f"OK   Arquivo processado e salvo em: {output_path}")
 
     except pd.errors.ParserError:
-        print(f"Erro ao parsear com pandas: {table_file}")
+        print(f"PARSE Erro ao parsear com pandas: {table_file}")
 
         # Copiar o arquivo para 'not_processed'
         destination = not_processed_path / table_file.name
@@ -73,17 +73,16 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
         if destination.exists():
             parent_folder = table_file.parent.parent.name  # Ajuste conforme a estrutura de pastas
             destination = not_processed_path / f"{table_file.stem}_{parent_folder}.csv"
-
         try:
             shutil.copy(table_file, destination)
-            print(f"Arquivo não processado copiado para: {destination}")
+            print(f"      Arquivo não processado copiado para: {destination}")
         except Exception as copy_error:
-            print(f"Falha ao copiar {table_file} para 'not_processed': {copy_error}")
+            print(f"      Falha ao copiar {table_file} para 'not_processed': {copy_error}")
 
     except pd.errors.EmptyDataError:
-        print(f"Erro de tabela vazia {table_file}")
+        print(f"VAZIA Erro de tabela vazia {table_file}")
 
-    # Copiar o arquivo para 'not_processed'
+        # Copiar o arquivo para 'not_processed'
         destination = not_processed_path / table_file.name
     
         # Lidar com possíveis duplicatas adicionando o nome da pasta pai
@@ -93,12 +92,8 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
 
         try:
             shutil.copy(table_file, destination)
-            print(f"Arquivo não processado copiado para: {destination}")
+            print(f"      Arquivo não processado copiado para: {destination}")
         except Exception as copy_error:
-            print(f"Falha ao copiar {table_file} para 'not_processed': {copy_error}")
-
-
-
-
+            print(f"      Falha ao copiar {table_file} para 'not_processed': {copy_error}")
 
 print("Operação concluída com êxito.")
