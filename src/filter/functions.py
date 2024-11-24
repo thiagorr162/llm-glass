@@ -154,14 +154,13 @@ def merge_refractive_index(dataframe):
     - DataFrame filtrado com colunas de índice de refração mescladas.
     """
     original_df = dataframe.copy()  # Armazena o DataFrame inicial para preservar os dados originais
-
+    compounds_df, _ = Filter_By_Compounds(dataframe)
     # Identifica colunas com valores fora do intervalo (1, 5), ignorando valores iguais a 0
     mask_out_of_range = (dataframe != 0) & ((dataframe < 1) | (dataframe > 5))  # Máscara para valores fora do intervalo
     columns_to_drop = mask_out_of_range.any(axis=0)  # Colunas que possuem ao menos um valor fora do intervalo
 
     # Remove as colunas identificadas
     filtered_df = dataframe.loc[:, ~columns_to_drop]  # Mantém apenas colunas válidas
-    
 
     #essa parte é pq algumas poucas colunas de compostos estavam passando
     desired_compounds = data["desired_compounds"] #pega a lista dos desired compounds 
@@ -193,8 +192,9 @@ def merge_refractive_index(dataframe):
     # dataframe referente apenas as composições que tem mais de 1 indice de refraçao registrados (zerando o resto), isso para podermos checar os diferentes indices de refraçao dela
     multiple_non_0 = filtered_df.where(rows_with_multiple_non0, other=0)
     dataframe_with_merged_ri = pd.concat([original_df, summed_refractive.rename("TERMINA AQUI/Refractive Index"), multiple_non_0], axis=1)
+    refractive_only = pd.concat([compounds_df, summed_refractive.rename("Refractive Index"), multiple_non_0], axis=1)
 
-    return dataframe_with_merged_ri
+    return dataframe_with_merged_ri, refractive_only
 
 
 
@@ -213,20 +213,22 @@ def all_filters(dataframe):
     final_filtered_withplus_and_na = pd.concat([rows_with_sum_100, properties_df], axis=1)
     final_filtered_withna, excluded_by_filterbynotplus = Filter_by_not_plus(final_filtered_withplus_and_na)
     final_filtered, excluded_by_removerowswithna= remove_rows_with_na(final_filtered_withna)
-    final_filtered = merge_refractive_index(final_filtered)
-    return final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna
+    final_filtered, compounds_and_refractive_only_df = merge_refractive_index(final_filtered)
+    return final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna, compounds_and_refractive_only_df
 
-final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe_t)
+final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna, compounds_and_refractive_only_df = all_filters(dataframe_t)
 
 # Imprimindo o tamanho da tabela final  e das tabelas excluidas
 
 filtered_path = Path("data/filtered")
 
-final_filtered.to_csv                 (filtered_path / 'final_df.csv',                       index = False)
-excluded_by_removeemptycolumns.to_csv (filtered_path / 'excluded_by_removeemptycolumns.csv', index = False)
-excluded_by_sumlines.to_csv           (filtered_path / 'excluded_by_sumlines.csv',           index = False)
-excluded_by_filterbynotplus.to_csv    (filtered_path / 'excluded_by_filterbynotplus.csv',    index = False)
-excluded_by_removerowswithna.to_csv   (filtered_path / 'excluded_by_removerowswithna.csv',   index = False)
+final_filtered.to_csv                  (filtered_path / 'final_df.csv',                         index = False)
+excluded_by_removeemptycolumns.to_csv  (filtered_path / 'excluded_by_removeemptycolumns.csv',   index = False)
+excluded_by_sumlines.to_csv            (filtered_path / 'excluded_by_sumlines.csv',             index = False)
+excluded_by_filterbynotplus.to_csv     (filtered_path / 'excluded_by_filterbynotplus.csv',      index = False)
+excluded_by_removerowswithna.to_csv    (filtered_path / 'excluded_by_removerowswithna.csv',     index = False)
+compounds_and_refractive_only_df.to_csv(filtered_path / 'compounds_and_refractive_only_df.csv', index=False)
+
 
 print(f"Tamanho do dataframe original: {dataframe_t.shape}")
 print(f"Tamanho da tabela final: {final_filtered.shape}")
@@ -234,3 +236,4 @@ print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: 
 print(f"Tamanho da tabela dos excluídos pelo filtro da soma das linhas: {excluded_by_sumlines.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro de ter + no nome da col: {excluded_by_filterbynotplus.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro de remover linhas com NaN: {excluded_by_removerowswithna.shape}")
+print(f"Tamanho da tabela dos Compostos e Índice de refração somente: {compounds_and_refractive_only_df.shape}")
