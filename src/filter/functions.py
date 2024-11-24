@@ -85,16 +85,43 @@ def remove_empty_columns(dataframe):
     filtered_dataframe = dataframe.drop(columns=empty_columns)
     return filtered_dataframe, excluded_columns_df
 
-def sum_lines(dataframe, tolerance = 2):
+def sum_lines(dataframe, tolerance=2):
     """
+    Adjusts DataFrame rows so that rows summing to approximately 1 are scaled up to sum to approximately 100.
+    
+    Parameters:
+    - dataframe: pandas DataFrame containing numerical data.
+    - tolerance: numerical value representing the acceptable deviation from the target sums (default is 2).
+    
     Returns:
-    - Filtered DataFrame with rows whose sum is close to 100.
-    - Excluded DataFrame with rows whose sum is not within the tolerance range of 100.
+    - rows_with_sum_100: DataFrame with rows summing close to 100, including those scaled from sum of 1.
+    - excluded_rows: DataFrame with rows whose sums are not within the tolerance ranges of 100 or 1.
     """
     columns = dataframe.columns
     row_sums = dataframe[columns].sum(axis=1)
-    rows_with_sum_100 = dataframe[(row_sums >= 100 - tolerance) & (row_sums <= 100 + tolerance)]
-    excluded_rows = dataframe.drop(rows_with_sum_100.index)
+    
+    # Tolerance for sum of 100
+    tolerance_100 = tolerance
+    # Tolerance for sum of 1 (proportional to tolerance for 100)
+    tolerance_1 = tolerance / 100
+    
+    # Identify rows where the sum is close to 100
+    mask_sum_100 = (row_sums >= 100 - tolerance_100) & (row_sums <= 100 + tolerance_100)
+    rows_that_sum_100 = dataframe.loc[mask_sum_100]
+    
+    # Identify rows where the sum is close to 1
+    mask_sum_1 = (row_sums >= 1 - tolerance_1) & (row_sums <= 1 + tolerance_1)
+    rows_with_sum_1 = dataframe.loc[mask_sum_1]
+    
+    # Scale rows summing close to 1 by 100
+    rows_with_sum_1_scaled = rows_with_sum_1 * 100
+    # Combine the rows summing to 100 and the scaled rows
+    rows_with_sum_100 = pd.concat([rows_that_sum_100, rows_with_sum_1_scaled])
+
+    # Exclude rows not included in the rows_with_sum_100
+    included_indices = rows_with_sum_100.index
+    excluded_rows = dataframe.drop(index=included_indices)
+
     return rows_with_sum_100, excluded_rows
 
 def filter_by_properties(dataframe):
@@ -121,41 +148,50 @@ def remove_rows_with_na(dataframe):
     excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
     return filtered_df, excluded_df
 
-def merge_refractive_index(dataframe, new_column_name="refractive_index"):
+def merge_refractive_index(dataframe):
     """
-    Merges multiple columns representing refractive index into a single column by summing their values.
-
-    Parameters:
-    - dataframe (pd.DataFrame): The input DataFrame containing various refractive index columns.
-    - new_column_name (str): The name for the consolidated refractive index column.
-
-    Returns:
-    - pd.DataFrame: The DataFrame with the new refractive index column and without the original columns.
+    Retorna:
+    - DataFrame filtrado com colunas de índice de refração mescladas.
     """
-    # Identify columns containing 'ref' or 'ri' (case-insensitive), part of any word
-    pattern = re.compile(r'(ref|ri)', re.IGNORECASE)
-    ref_columns = [col for col in dataframe.columns if pattern.search(col)]
+    original_df = dataframe.copy()  # Armazena o DataFrame inicial para preservar os dados originais
+
+    # Identifica colunas com valores fora do intervalo (1, 5), ignorando valores iguais a 0
+    mask_out_of_range = (dataframe != 0) & ((dataframe < 1) | (dataframe > 5))  # Máscara para valores fora do intervalo
+    columns_to_drop = mask_out_of_range.any(axis=0)  # Colunas que possuem ao menos um valor fora do intervalo
+
+    # Remove as colunas identificadas
+    filtered_df = dataframe.loc[:, ~columns_to_drop]  # Mantém apenas colunas válidas
     
-    if not ref_columns:
-        print("No refractive index columns found to merge.")
-        return dataframe
+    desired_compounds = data["desired_compounds"]
+    columns_to_keep = [col for col in filtered_df.columns if col not in desired_compounds]
+    filtered_df = filtered_df[columns_to_keep]
+    def should_keep_column(col_name):
+        if 'density' in col_name.lower():
+            return False
+        return bool(re.search(r'(N|RI)', col_name, re.IGNORECASE)) or bool(re.search(r'refrac', col_name, re.IGNORECASE))
+    columns_to_keep = [col for col in filtered_df.columns if should_keep_column(col)]
+    filtered_df = filtered_df[columns_to_keep]
+
+    columns_to_remove = filtered_df.columns
+    original_df = original_df.drop(columns=columns_to_remove)
+    # Conta o número de valores não nulos em cada linha
+    non_zero_counts = (filtered_df != 0).sum(axis=1)
+
+    # Calcula a soma dos valores não nulos para cada linha
+    summed_refractive = filtered_df.sum(axis=1, skipna=True)
+
+    # preenche com -1 se mais de 1 valor não nulo for encontrado
+    summed_refractive[non_zero_counts > 1] = -1
     
-    # Convert identified columns to numeric, coercing errors to NaN
-    dataframe[ref_columns] = dataframe[ref_columns].apply(pd.to_numeric, errors='coerce')
-    
-    # Sum the identified columns row-wise, ignoring NaNs
-    dataframe[new_column_name] = dataframe[ref_columns].sum(axis=1, skipna=True)
-    
-    # Handle cases where all merged columns are NaN by setting the new column to NaN
-    all_nan = dataframe[ref_columns].isna().all(axis=1)
-    dataframe.loc[all_nan, new_column_name] = pd.NA
-    
-    # Optionally, drop the original refractive index columns after verification
-    # Uncomment the following line to drop the columns
-    # dataframe = dataframe.drop(columns=ref_columns)
-    
-    print(f"Merged columns {ref_columns} into '{new_column_name}'.")
-    return dataframe
+    rows_with_multiple_non0 = non_zero_counts > 1
+    multiple_non_0 = filtered_df.where(rows_with_multiple_non0, other=0)
+    # original_df = original_df.drop()
+    dataframe_with_merged_ri = pd.concat([original_df, summed_refractive.rename("TERMINA AQUI"), multiple_non_0], axis=1)
+
+    return dataframe_with_merged_ri
+
+
+
 
 def all_filters(dataframe):
     """
@@ -171,6 +207,7 @@ def all_filters(dataframe):
     final_filtered_withplus_and_na = pd.concat([rows_with_sum_100, properties_df], axis=1)
     final_filtered_withna, excluded_by_filterbynotplus = Filter_by_not_plus(final_filtered_withplus_and_na)
     final_filtered, excluded_by_removerowswithna= remove_rows_with_na(final_filtered_withna)
+    final_filtered = merge_refractive_index(final_filtered)
     return final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna
 
 final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe_t)
@@ -179,18 +216,13 @@ final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_b
 
 filtered_path = Path("data/filtered")
 
-# Aplicando a soma dos índices de refração
-
-final_RI = merge_refractive_index(final_filtered)
-
-final_RI.to_csv                       (filtered_path / 'final_RI.csv',                       index = False)
 final_filtered.to_csv                 (filtered_path / 'final_df.csv',                       index = False)
 excluded_by_removeemptycolumns.to_csv (filtered_path / 'excluded_by_removeemptycolumns.csv', index = False)
 excluded_by_sumlines.to_csv           (filtered_path / 'excluded_by_sumlines.csv',           index = False)
 excluded_by_filterbynotplus.to_csv    (filtered_path / 'excluded_by_filterbynotplus.csv',    index = False)
 excluded_by_removerowswithna.to_csv   (filtered_path / 'excluded_by_removerowswithna.csv',   index = False)
 
-print(f"Tamanho do dataframe original: {dataframe_t}")
+print(f"Tamanho do dataframe original: {dataframe_t.shape}")
 print(f"Tamanho da tabela final: {final_filtered.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: {excluded_by_removeemptycolumns.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro da soma das linhas: {excluded_by_sumlines.shape}")

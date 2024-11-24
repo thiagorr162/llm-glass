@@ -36,7 +36,7 @@ with properties_file.open(encoding="utf-8") as f:
 # Iterar sobre todos os arquivos .csv dentro de 'processed/splitted'
 for table_file in input_path.rglob("*/processed/splitted/*.csv"):
     try:
-        df = pd.read_csv(table_file, header=None)
+        df = pd.read_csv(table_file, encoding='utf-8', delimiter=',', header=None)
         df = df.dropna(axis=1, how="all")
 
         df = df.T
