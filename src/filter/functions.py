@@ -3,17 +3,14 @@ import pandas as pd
 from pathlib import Path  
 import re
 
-base_path = Path("data/raw")
+# Define base paths
+BASE_PATH = Path("data/patents")
+FILTERED_PATH = Path("data/filtered")
 
-csv_path1 = base_path / "final_filtered_concatenated.csv"
-csv_path2 = base_path / "refractiveIndex.csv"
-csv_path3 = base_path / "merged_df.csv"
-dataframe1 = pd.read_csv(csv_path1, low_memory=False)
-dataframe2 = pd.read_csv(csv_path2, low_memory=False)
-dataframe3 = pd.read_csv(csv_path3, low_memory=False)
-dataframe4 = pd.concat([dataframe1, dataframe3], axis=1).drop_duplicates()
-json_path =  Path("json/properties.json")
-
+# Load data
+csv_path = BASE_PATH / "merged_df.csv"
+dataframe_t = pd.read_csv(csv_path, low_memory=False)
+json_path = Path("json/properties.json")
 with open(json_path, 'r') as file:
     data = json.load(file)
 
@@ -88,7 +85,7 @@ def remove_empty_columns(dataframe):
     filtered_dataframe = dataframe.drop(columns=empty_columns)
     return filtered_dataframe, excluded_columns_df
 
-def sum_lines(dataframe, tolerance=2):
+def sum_lines(dataframe, tolerance = 2):
     """
     Returns:
     - Filtered DataFrame with rows whose sum is close to 100.
@@ -108,7 +105,7 @@ def filter_by_properties(dataframe):
     """
     properties = ["refractive", "abbe", "liquidus", "c.", "density", "α", "modulus", "fiber", "devitrification",
                   "point", "crystallization", "thermal", "mean", "glass transition", "crystallinity", "electric",
-                  "onset", "transition", "permittivity", "iso"]
+                  "onset", "transition", "permittivity", "iso", "RI", "index", "ref", "nd", "η", "nm", "ratio", "n5", "n6", "n7", "n8", "n9"]
     filtered_columns = [col for col in dataframe.columns if any(prop.lower() in col.lower() for prop in properties)]
     filtered_dataframe = dataframe[filtered_columns]
     excluded_dataframe = dataframe.drop(columns=filtered_columns)
@@ -123,6 +120,42 @@ def remove_rows_with_na(dataframe):
     filtered_df = dataframe.dropna()
     excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
     return filtered_df, excluded_df
+
+def merge_refractive_index(dataframe, new_column_name="refractive_index"):
+    """
+    Merges multiple columns representing refractive index into a single column by summing their values.
+
+    Parameters:
+    - dataframe (pd.DataFrame): The input DataFrame containing various refractive index columns.
+    - new_column_name (str): The name for the consolidated refractive index column.
+
+    Returns:
+    - pd.DataFrame: The DataFrame with the new refractive index column and without the original columns.
+    """
+    # Identify columns containing 'ref' or 'ri' (case-insensitive), part of any word
+    pattern = re.compile(r'(ref|ri)', re.IGNORECASE)
+    ref_columns = [col for col in dataframe.columns if pattern.search(col)]
+    
+    if not ref_columns:
+        print("No refractive index columns found to merge.")
+        return dataframe
+    
+    # Convert identified columns to numeric, coercing errors to NaN
+    dataframe[ref_columns] = dataframe[ref_columns].apply(pd.to_numeric, errors='coerce')
+    
+    # Sum the identified columns row-wise, ignoring NaNs
+    dataframe[new_column_name] = dataframe[ref_columns].sum(axis=1, skipna=True)
+    
+    # Handle cases where all merged columns are NaN by setting the new column to NaN
+    all_nan = dataframe[ref_columns].isna().all(axis=1)
+    dataframe.loc[all_nan, new_column_name] = pd.NA
+    
+    # Optionally, drop the original refractive index columns after verification
+    # Uncomment the following line to drop the columns
+    # dataframe = dataframe.drop(columns=ref_columns)
+    
+    print(f"Merged columns {ref_columns} into '{new_column_name}'.")
+    return dataframe
 
 def all_filters(dataframe):
     """
@@ -140,19 +173,24 @@ def all_filters(dataframe):
     final_filtered, excluded_by_removerowswithna= remove_rows_with_na(final_filtered_withna)
     return final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna
 
-final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe4)
+final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna = all_filters(dataframe_t)
 
-# imprimindo o tamanho da tabela final  e das tabelas excluidas
+# Imprimindo o tamanho da tabela final  e das tabelas excluidas
 
 filtered_path = Path("data/filtered")
 
+# Aplicando a soma dos índices de refração
+
+final_RI = merge_refractive_index(final_filtered)
+
+final_RI.to_csv                       (filtered_path / 'final_RI.csv',                       index = False)
 final_filtered.to_csv                 (filtered_path / 'final_df.csv',                       index = False)
 excluded_by_removeemptycolumns.to_csv (filtered_path / 'excluded_by_removeemptycolumns.csv', index = False)
 excluded_by_sumlines.to_csv           (filtered_path / 'excluded_by_sumlines.csv',           index = False)
 excluded_by_filterbynotplus.to_csv    (filtered_path / 'excluded_by_filterbynotplus.csv',    index = False)
 excluded_by_removerowswithna.to_csv   (filtered_path / 'excluded_by_removerowswithna.csv',   index = False)
 
-print(f"Tamanho do dataframe original: {dataframe4.shape}")
+print(f"Tamanho do dataframe original: {dataframe_t}")
 print(f"Tamanho da tabela final: {final_filtered.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro que remove colunas vazias: {excluded_by_removeemptycolumns.shape}")
 print(f"Tamanho da tabela dos excluídos pelo filtro da soma das linhas: {excluded_by_sumlines.shape}")

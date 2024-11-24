@@ -20,3 +20,7 @@ for table_file in input_path.rglob("*/processed/dataframe/*.csv"):
 merged_df = pd.concat(all_dfs, join="outer", ignore_index=True)
 
 merged_df.to_csv(output_path / "merged_df.csv")
+
+print("Tamanho do dataframe gerado:",merged_df.shape)
+
+print("Operação concluída com êxito.")

@@ -96,3 +96,5 @@ for json_file in json_folder.rglob("*.json"):
         else:
             print(f"Nenhuma tag <patent-tables> encontrada no arquivo {json_file.name}")
             breakpoint()
+
+print("Operação concluída com êxito.")
