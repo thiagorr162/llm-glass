@@ -162,31 +162,37 @@ def merge_refractive_index(dataframe):
     # Remove as colunas identificadas
     filtered_df = dataframe.loc[:, ~columns_to_drop]  # Mantém apenas colunas válidas
     
-    desired_compounds = data["desired_compounds"]
-    columns_to_keep = [col for col in filtered_df.columns if col not in desired_compounds]
-    filtered_df = filtered_df[columns_to_keep]
+
+    #essa parte é pq algumas poucas colunas de compostos estavam passando
+    desired_compounds = data["desired_compounds"] #pega a lista dos desired compounds 
+    columns_to_keep = [col for col in filtered_df.columns if col not in desired_compounds] #tira os compounds
+    filtered_df = filtered_df[columns_to_keep] # tira os compounds
+
+    #essa parte da uma garantida que as colunas sejam de refractive index
     def should_keep_column(col_name):
         if 'density' in col_name.lower():
             return False
         return bool(re.search(r'(N|RI)', col_name, re.IGNORECASE)) or bool(re.search(r'refrac', col_name, re.IGNORECASE))
     columns_to_keep = [col for col in filtered_df.columns if should_keep_column(col)]
+
+    #dataframe so com colunas que referem a refractive index
     filtered_df = filtered_df[columns_to_keep]
 
+    # as proximas 2 linhas tiram essas colunas de refractive index do meio do dataframe e jogam pro final
     columns_to_remove = filtered_df.columns
     original_df = original_df.drop(columns=columns_to_remove)
+
     # Conta o número de valores não nulos em cada linha
     non_zero_counts = (filtered_df != 0).sum(axis=1)
-
     # Calcula a soma dos valores não nulos para cada linha
     summed_refractive = filtered_df.sum(axis=1, skipna=True)
-
-    # preenche com -1 se mais de 1 valor não nulo for encontrado
+    # preenche com -1 se mais de 1 valor não nulo for encontrado, o que significa que aquela composiçao tem mais de 1 indice de refraçao registrado (provavelmente dos diferentes espectros de luz)
     summed_refractive[non_zero_counts > 1] = -1
-    
+    # linhas que tem mais de 1 valor nao nulo
     rows_with_multiple_non0 = non_zero_counts > 1
+    # dataframe referente apenas as composições que tem mais de 1 indice de refraçao registrados (zerando o resto), isso para podermos checar os diferentes indices de refraçao dela
     multiple_non_0 = filtered_df.where(rows_with_multiple_non0, other=0)
-    # original_df = original_df.drop()
-    dataframe_with_merged_ri = pd.concat([original_df, summed_refractive.rename("TERMINA AQUI"), multiple_non_0], axis=1)
+    dataframe_with_merged_ri = pd.concat([original_df, summed_refractive.rename("TERMINA AQUI/Refractive Index"), multiple_non_0], axis=1)
 
     return dataframe_with_merged_ri
 
