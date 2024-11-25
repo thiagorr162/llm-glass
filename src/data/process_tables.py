@@ -35,6 +35,11 @@ with properties_file.open(encoding="utf-8") as f:
 
 # Iterar sobre todos os arquivos .csv dentro de 'processed/splitted'
 for table_file in input_path.rglob("*/processed/splitted/*.csv"):
+    with open(table_file, 'r', encoding='utf-8') as file:
+        linhas = file.readlines()
+    with_2plus_commas = [linha for linha in linhas if linha.count(',') > 2]
+    with open(table_file, 'w', encoding='utf-8') as file:
+        file.writelines(with_2plus_commas)
     try:
         df = pd.read_csv(table_file, encoding='utf-8', delimiter=',', header=None)
         df = df.dropna(axis=1, how="all")
@@ -61,7 +66,7 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
         output_path.mkdir(parents=True, exist_ok=True)
 
         new_df.to_csv(output_path / (table_file.stem + ".csv"), index=False)
-        print(f"OK   Arquivo processado e salvo em: {output_path}")
+
 
     except pd.errors.ParserError:
         print(f"PARSE Erro ao parsear com pandas: {table_file}")
@@ -80,7 +85,7 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
             print(f"      Falha ao copiar {table_file} para 'not_processed': {copy_error}")
 
     except pd.errors.EmptyDataError:
-        print(f"VAZIA Erro de tabela vazia {table_file}")
+
 
         # Copiar o arquivo para 'not_processed'
         destination = not_processed_path / table_file.name
@@ -92,7 +97,7 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
 
         try:
             shutil.copy(table_file, destination)
-            print(f"      Arquivo não processado copiado para: {destination}")
+
         except Exception as copy_error:
             print(f"      Falha ao copiar {table_file} para 'not_processed': {copy_error}")
 
