@@ -3,7 +3,7 @@ import pathlib
 import re
 import unicodedata
 import shutil  # Import necessário para copiar arquivos
-
+from statistics import mode
 import pandas as pd
 
 
@@ -35,11 +35,21 @@ with properties_file.open(encoding="utf-8") as f:
 
 # Iterar sobre todos os arquivos .csv dentro de 'processed/splitted'
 for table_file in input_path.rglob("*/processed/splitted/*.csv"):
+    commas = [0]
     with open(table_file, 'r', encoding='utf-8') as file:
         linhas = file.readlines()
-    with_2plus_commas = [linha for linha in linhas if linha.count(',') > 2]
+    for linha in linhas:
+        commas_per_line = linha.count(',')
+        commas.append(commas_per_line)
+    max_commas = max(commas)
+    for linha in linhas:
+        commas_per_line = linha.count(',')
+        while commas_per_line != max_commas:
+            linha += ','
+            commas_per_line += 1
+    equalized_commas = [linha for linha in linhas if linha.count(',') == max_commas]
     with open(table_file, 'w', encoding='utf-8') as file:
-        file.writelines(with_2plus_commas)
+        file.writelines(equalized_commas)
     try:
         df = pd.read_csv(table_file, encoding='utf-8', delimiter=',', header=None)
         df = df.dropna(axis=1, how="all")
