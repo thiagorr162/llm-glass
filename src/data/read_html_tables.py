@@ -3,98 +3,90 @@ import json
 import re
 import unicodedata
 from pathlib import Path
-
 from bs4 import BeautifulSoup
 
 
 def normalize_string(s):
-    """Normaliza as strings removendo acentos e convertendo para minúsculas."""
+    """
+    Normaliza uma string removendo acentos, espaços extras e convertendo para minúsculas.
+    """
     return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("utf-8").lower())
 
 
 def html_table_to_list(table):
-    """Converte uma tabela HTML para uma lista de listas (linhas e colunas)."""
-    rows = table.find_all("tr")
-    table_data = []
-
-    for row in rows:
-        columns = row.find_all("td")
-        row_data = [col.get_text(strip=True) for col in columns]
-        if row_data:  # Somente adicionar se houver dados
-            table_data.append(row_data)
-
-    return table_data
+    """
+    Converte uma tabela HTML para uma lista de listas (linhas e colunas).
+    """
+    return [
+        [col.get_text(strip=True) for col in row.find_all("td")]
+        for row in table.find_all("tr")
+        if row.find_all("td")  # Somente adicionar linhas com colunas válidas
+    ]
 
 
+# Carregar os compostos desejados do arquivo JSON
 properties_file = Path("json/properties.json")
+try:
+    with properties_file.open(encoding="utf-8") as f:
+        properties_data = json.load(f)
+        desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
+except (FileNotFoundError, json.JSONDecodeError) as e:
+    print(f"Erro ao carregar o arquivo properties.json: {e}")
+    desired_compounds = []
 
-with properties_file.open(encoding="utf-8") as f:
-    properties_data = json.load(f)
-    desired_compounds = [normalize_string(compound) for compound in properties_data.get("desired_compounds", [])]
-
-
-# Definir o caminho para a pasta dos JSONs e de saída para as tabelas
+# Caminho da pasta dos JSONs
 json_folder = Path("data/patents")
 
-
-# Iterar sobre todos os arquivos JSON na pasta
+# Iterar sobre todos os arquivos JSON
 for json_file in json_folder.rglob("*.json"):
-    # Abrir e ler o arquivo JSON
-    with json_file.open(encoding="utf-8") as f:
-        data = json.load(f)
+    try:
+        with json_file.open(encoding="utf-8") as f:
+            data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Erro ao ler o arquivo {json_file.name}: {e}")
+        continue
 
     # Verificar se existem tabelas no campo "html_tables"
     if not data.get("html_tables"):
-        continue  # Pular este arquivo JSON se não houver tabelas
+        continue
 
     # Processar cada bloco de tabelas no JSON
     for idx, patent_tables in enumerate(data["html_tables"], start=1):
         soup = BeautifulSoup(patent_tables, "html.parser")
-
-        # Encontrar todas as tags <patent-tables>
         patent_table_elements = soup.find_all("patent-tables")
 
-        # Verificar se há mais de uma tag <patent-tables>
         if len(patent_table_elements) > 1:
             print(f"Mais de uma tag <patent-tables> encontrada no arquivo {json_file.name}")
-            breakpoint()  # Parar para depuração, se necessário
 
         # Processar a primeira (e possivelmente única) tag <patent-tables>
-        if patent_table_elements:
-            patent_table = patent_table_elements[0]
+        if not patent_table_elements:
+            print(f"Nenhuma tag <patent-tables> encontrada no arquivo {json_file.name}")
+            continue
 
-            table_data = html_table_to_list(patent_table)
+        patent_table = patent_table_elements[0]
+        table_data = html_table_to_list(patent_table)
 
-            contains_desired = False
-            for row in table_data:
-                for cell in row:
-                    normalized_cell = normalize_string(cell)
-                    if any(desired in normalized_cell for desired in desired_compounds):
-                        contains_desired = True
-                        break
-                if contains_desired:
-                    break
+        # Verificar se a tabela contém compostos desejados
+        contains_desired = any(
+            any(desired in normalize_string(cell) for desired in desired_compounds)
+            for row in table_data
+            for cell in row
+        )
 
-            desired_output_folder = json_file.parent / "tables" / "good_tables"
-            desired_output_folder.mkdir(parents=True, exist_ok=True)  # Criar a pasta de saída, se não existir
+        # Criar pastas de saída
+        output_folder = json_file.parent / "tables" / ("good_tables" if contains_desired else "bad_tables")
+        output_folder.mkdir(parents=True, exist_ok=True)
 
-            non_desired_output_folder = json_file.parent / "tables" / "bad_tables"
-            non_desired_output_folder.mkdir(parents=True, exist_ok=True)
+        # Nome do arquivo CSV
+        output_file = output_folder / f"{json_file.stem}-table_{idx}.csv"
 
-            # Gerar o nome do arquivo CSV baseado no nome do arquivo JSON
-            if contains_desired:
-                output_file = desired_output_folder / f"{json_file.stem}-table_{idx}.csv"
-            else:
-                output_file = non_desired_output_folder / f"{json_file.stem}-table_{idx}.csv"
-
-            # Salvar a tabela como CSV
+        # Salvar a tabela como CSV
+        try:
             with output_file.open(mode="w", newline="", encoding="utf-8") as file:
                 writer = csv.writer(file, delimiter=",")
                 writer.writerows(table_data)
-
             print(f"Tabela salva em {output_file}")
-        else:
-            print(f"Nenhuma tag <patent-tables> encontrada no arquivo {json_file.name}")
-            breakpoint()
+        except IOError as e:
+            print(f"Erro ao salvar o arquivo {output_file.name}: {e}")
 
 print("Operação concluída com êxito.")
