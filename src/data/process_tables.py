@@ -20,8 +20,7 @@ def copy_to_not_processed(src_path, dest_folder):
         destination = dest_folder / f"{src_path.stem}_{parent_folder}.csv"
     try:
         # Copia o arquivo para o destino
-        shutil.copy(src_path, destination)
-        print(f"      Arquivo não processado copiado para: {destination}")
+        shutil.copy(src_path, destination)  
     except Exception as e:
         # Exibe mensagem de erro em caso de falha na cópia
         print(f"      Falha ao copiar {src_path} para 'not_processed': {e}")
@@ -73,6 +72,9 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
             new_header = df.iloc[header_idx]
             new_df = df[header_idx + 1:].copy()  # Exclui o cabeçalho e mantém os dados
             new_df.columns = new_header  # Define as colunas do novo DataFrame com o cabeçalho encontrado
+            
+            # Adiciona a coluna com o nome do arquivo atual
+            new_df['IDS'] = table_file  # Adiciona o caminho do arquivo em cada linha
             
             # Define o caminho de saída para salvar o DataFrame processado
             output_path = table_file.parents[1] / "dataframe"

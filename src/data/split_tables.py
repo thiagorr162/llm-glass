@@ -64,7 +64,7 @@ for table_file in input_path.rglob("*/good_tables/*.csv"):
             print(f"Arquivo salvo: {output_file}")
 
         else:
-            # Copiar arquivo sem divisões para 'not_splited'
+            # Copiar arquivo problemático para 'not_splited'
             destination = not_splited_path / table_file.name
             if destination.exists():
                 parent_folder = table_file.parent.parent.name
