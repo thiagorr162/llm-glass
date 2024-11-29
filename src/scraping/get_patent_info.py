@@ -28,7 +28,7 @@ parser.add_argument(
     "--wait",
     "-w",
     type=int,
-    default=10,
+    default=3,
     help="Seconds to wait to load patents.",
 )
 parser.add_argument(
