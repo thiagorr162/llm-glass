@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# python src/scraping/get_patent_info.py -c {country} -p {n_pages} 
+# python src/scraping/get_patent_info.py -p {n_pages} 
 
 parser = argparse.ArgumentParser(
     description="Busca de patentes no Google Patents com base em palavras-chave e número de páginas."
@@ -28,8 +28,8 @@ parser.add_argument(
     "--wait",
     "-w",
     type=int,
-    default=3,
-    help="Seconds to wait to load patents.",
+    default=10,
+    help="Segundos para esperar o carregamento das patentes (default: 10)",
 )
 parser.add_argument(
     "--keywords",
@@ -43,20 +43,26 @@ parser.add_argument(
     "-c",
     type=str,
     default=None,
-    help="Country to get patents. (default: None, get patent for any country.)",
+    help="País para buscar patentes (default: None, buscar em qualquer país).",
 )
 parser.add_argument(
     "--selenium_path",
     type=str,
     default="src/scraping/geckodriver.exe",
-    help="Path to selenium driver.",
+    help="Caminho para o driver do Selenium.",
+)
+parser.add_argument(
+    "--results",
+    "-r",
+    type=int,
+    default=100,
+    help="Número de resultados por página na busca (default: 100)",
 )
 
 args = parser.parse_args()
-
+results = args.results
 keywords = args.keywords
 pages = args.pages
-
 country = args.country
 
 all_urls = []
@@ -64,28 +70,27 @@ all_urls = []
 geckodriver_path = args.selenium_path
 service = Service(executable_path=geckodriver_path)
 
-firefox_binary_path = "C:/Program Files/Mozilla Firefox/firefox.exe"  
+firefox_binary_path = "C:/Program Files/Mozilla Firefox/firefox.exe"
 options = Options()
 options.binary = firefox_binary_path
 
 browser = webdriver.Firefox(service=service, options=options)
 
-for page in range(0, pages + 1):
+def construct_search_url(keywords, page, results, country=None):
+    base_url = "https://patents.google.com/?q="
+    keyword_query = "&q=".join([f"({keyword})" for keyword in keywords])
+    url = f"{base_url}{keyword_query}&num={results}&page={page}"
+    if country:
+        url += f"&country={country.upper()}"
+    return url
+
+for page in range(1, pages + 1):
     print(f"Getting links for page: {page}")
 
-    search_url = (
-        "https://patents.google.com/?q=" + "&q=".join([f"TI%3d({keyword})" for keyword in keywords]) + "&sort=new"
-    )
-    search_url = search_url + "&sort=new"
-    search_url = search_url + f"&page={page}"
-
-    if args.country is not None:
-        country = country.upper()
-        search_url = search_url + f"&country={country}"
-
+    search_url = construct_search_url(keywords, page, results, country)
     browser.get(search_url)
 
-    wait = WebDriverWait(browser, args.wait)
+    wait = WebDriverWait(browser, timeout=args.wait, poll_frequency=0.5)
 
     patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
 
@@ -113,7 +118,6 @@ for url in all_urls:
         continue
 
     browser.get(url)
-
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
     def get_meta_content(selector):
@@ -132,7 +136,6 @@ for url in all_urls:
     application_number = get_meta_content("meta[name='citation_patent_application_number']")
     publication_number = get_meta_content("meta[name='citation_patent_publication_number']")
     pdf_url = get_meta_content("meta[name='citation_pdf_url']")
-
     inventors = get_meta_content("meta[scheme='inventor']")
     assignee = get_meta_content("meta[scheme='assignee']")
     date = get_meta_content("meta[name='DC.date']")
@@ -145,7 +148,6 @@ for url in all_urls:
         for table in patent_tables:
             patent_table_html = table.get_attribute("outerHTML")
             soup = BeautifulSoup(patent_table_html, "html.parser").prettify()
-
             html_tables.append(soup)
     except TimeoutException:
         print(f"No patent tables found on {url}.")
@@ -169,4 +171,3 @@ for url in all_urls:
         json.dump(patent_data, f, ensure_ascii=False, indent=4)
 
 browser.quit()
-
