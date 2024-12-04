@@ -1,142 +1,198 @@
-# Projeto de Filtragem e Análise de Dados
+# Data Filtering and Analysis Project
 
-Este repositório contém um conjunto de funções em Python para realizar a filtragem e análise de dados de compostos químicos e propriedades associadas. O código foi desenvolvido para processar três arquivos CSV, aplicar filtros personalizados e gerar um DataFrame final com informações relevantes.
+This repository contains a set of Python functions designed to filter and analyze chemical compound data and associated properties. The code is developed to process a CSV file, apply custom filters, and generate a final DataFrame with relevant information.
 
-## Requisitos
+## Requirements
 
-Antes de começar, você precisará ter o seguinte instalado:
+Before you begin, ensure you have the following installed:
 
 - **Python 3.x**
-- **Bibliotecas Python**:
+- **Python Libraries**:
   - `pandas`
   - `json`
   - `re`
   - `pathlib`
 
-## Descrição das Funções
+## Function Descriptions
 
-O código contém várias funções que aplicam filtros aos dados de compostos químicos e propriedades. Abaixo está uma descrição detalhada de cada uma delas:
+The code contains several functions that apply filters to chemical compound data and properties. Below is a detailed description of each function:
 
-### 1. `Filter_By_Compounds(dataframe)`
+### 1. `filter_by_compounds(dataframe)`
 
-Filtra as colunas do DataFrame com base nos compostos definidos no arquivo `properties.json`. Apenas as colunas que correspondem aos compostos desejados são mantidas.
+Filters the DataFrame columns based on the compounds defined in the `properties.json` file. Only columns that match the desired compounds are retained.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Parameters:**
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as colunas que correspondem aos compostos desejados, conforme definido no JSON.
-- Um DataFrame de exclusão contendo as colunas que não correspondem aos compostos desejados.
+- `dataframe`: DataFrame containing the data to be filtered.
 
-### 2. `Filter_by_have_numbers(dataframe)`
+**Returns:**
 
-Filtra as colunas do DataFrame que contêm números em seus nomes. Isso pode ser útil para identificar colunas que possuem dados quantitativos ou numéricos.
+- **Filtered DataFrame**: Contains only the columns corresponding to the desired compounds as specified in `properties.json`.
+- **Excluded DataFrame**: Contains the columns that do not match the desired compounds.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+### 2. `filter_columns_without_plus(dataframe)`
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as colunas que têm números no nome.
-- Um DataFrame de exclusão contendo as colunas que não têm números no nome.
+Removes columns that contain the `'+'` character in their names. This is useful when you want to exclude columns with a specific pattern in their names.
 
-### 3. `Filter_by_2to8(dataframe)`
+**Parameters:**
 
-Filtra as colunas do DataFrame com base no comprimento do nome da coluna. Este filtro mantém apenas as colunas cujo nome tenha entre 2 e 8 caracteres.
+- `dataframe`: DataFrame containing the data to be filtered.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Returns:**
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as colunas cujos nomes têm entre 2 e 8 caracteres.
-- Um DataFrame de exclusão contendo as colunas cujos nomes não atendem a esse critério de comprimento.
+- **Filtered DataFrame**: Contains only the columns without the `'+'` character in their names.
+- **Excluded DataFrame**: Contains the columns that have the `'+'` character.
 
-### 4. `Pull_Apart_Compoundsdataframe_NotCompoundsdataframe(dataframe)`
+### 3. `clean_and_fill_zeros(dataframe)`
 
-Esta função aplica os filtros `Filter_by_have_numbers` e `Filter_by_2to8` sequencialmente para separar as colunas de compostos das outras colunas. Ela mantém as colunas que atendem ao critério de ter números no nome e ter entre 2 e 8 caracteres no nome.
+Replaces `'—'` (em dashes) and `NaN` (Not a Number) values with `0` in the DataFrame. This helps to clean the DataFrame, making the data more consistent and ready for analysis.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Parameters:**
 
-**Retorno:**
-- Um DataFrame de compostos, contendo as colunas que atendem ao critério de ter números no nome e comprimento de 2 a 8 caracteres.
-- Um DataFrame de exclusão, contendo as colunas que não atendem a esses critérios.
+- `dataframe`: DataFrame containing the data to be cleaned.
 
-### 5. `Filter_by_not_plus(dataframe)`
+**Returns:**
 
-Filtra as colunas que não contêm o caractere `+` no nome. Esse filtro pode ser útil quando se deseja excluir colunas com um padrão específico no nome (neste caso, o caractere `+`).
+- **Cleaned DataFrame**: All `'—'` and `NaN` values are replaced with `0`, and data types are converted to numeric.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+### 4. `remove_columns_with_only_zeros(dataframe)`
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as colunas que não contêm o caractere `+` no nome.
-- Um DataFrame de exclusão contendo as colunas que possuem o caractere `+`.
+Removes columns from the DataFrame that contain only zero values. Empty columns can be removed to improve analysis performance and make the DataFrame more concise.
 
-### 6. `insert_zeros(dataframe)`
+**Parameters:**
 
-Substitui valores `—` (travessões) e valores `NaN` (não numéricos) por 0 no DataFrame. Isso ajuda a limpar o DataFrame, tornando os dados mais consistentes e prontos para análise.
+- `dataframe`: DataFrame containing the data to be filtered.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem limpos.
+**Returns:**
 
-**Retorno:**
-- Um DataFrame limpo, onde os valores `—` e `NaN` foram substituídos por 0.
+- **Filtered DataFrame**: DataFrame without columns that are entirely zeros.
+- **Excluded DataFrame**: Contains the columns that were removed because they were empty.
 
-### 7. `remove_empty_columns(dataframe)`
+### 5. `filter_rows_by_sum(dataframe, tolerance=2)`
 
-Remove as colunas do DataFrame que contêm apenas valores 0. Colunas vazias podem ser removidas para melhorar a performance da análise e tornar o DataFrame mais enxuto.
+Filters the DataFrame rows where the sum of the column values is close to 100, within a defined tolerance (default is 2). This filter can be useful to adjust the data and ensure that the values sum to an expected value (e.g., in material compositions).
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Parameters:**
 
-**Retorno:**
-- Um DataFrame filtrado sem as colunas vazias (que possuem apenas valores 0).
-- Um DataFrame de exclusão contendo as colunas que foram removidas por estarem vazias.
+- `dataframe`: DataFrame containing the data to be filtered.
+- `tolerance` (optional): Margin of error for the sum; default is `2`.
 
-### 8. `sum_lines(dataframe, tolerance=2)`
+**Returns:**
 
-Filtra as linhas do DataFrame em que o somatório dos valores das colunas é próximo de 100, com uma tolerância definida (padrão de 2). Esse filtro pode ser útil para ajustar os dados e garantir que os valores somem a um valor esperado (por exemplo, em composição de materiais).
+- **Filtered DataFrame**: Contains rows where the sum is approximately 100%.
+- **Excluded DataFrame**: Contains rows that do not meet the sum criteria.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
-- `tolerance` (opcional): Valor que define a margem de erro para a soma, o padrão é 2.
+### 6. `filter_columns_by_properties(dataframe)`
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as linhas cujo somatório das colunas é dentro do intervalo de 100 ± tolerância.
-- Um DataFrame de exclusão contendo as linhas cujo somatório não está dentro do intervalo especificado.
+Filters the DataFrame columns that contain specific chemical or physical properties, such as "refractive", "density", "abbe", etc. These properties are defined in a fixed list and are searched for in the column names.
 
-### 9. `filter_by_properties(dataframe)`
+**Parameters:**
 
-Filtra as colunas do DataFrame que contêm propriedades químicas ou físicas específicas, como "refrativa", "densidade", "abbe", etc. Essas propriedades são definidas em uma lista fixa e são procuradas nos nomes das colunas.
+- `dataframe`: DataFrame containing the data to be filtered.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Returns:**
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as colunas que possuem as propriedades especificadas na lista.
-- Um DataFrame de exclusão contendo as colunas que não possuem as propriedades desejadas.
+- **Filtered DataFrame**: Contains only the columns with the specified properties.
+- **Excluded DataFrame**: Contains the columns that do not have the desired properties.
 
-### 10. `remove_rows_with_na(dataframe)`
+### 7. `remove_rows_with_nan(dataframe)`
 
-Esta função remove linhas que contenham pelo menos um valor NaN (deve ser aplicada ao final do processo de filtragem)
+Removes rows that contain `NaN` values. This should be applied at the end of the filtering process.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+**Parameters:**
 
-**Retorno:**
-- Um DataFrame filtrado contendo apenas as linhas que somam aproximadamente 100 e as colunas que contêm as propriedades desejadas.
-- Um DataFrame de exclusão contendo as linhas que não atendem ao critério de soma e as colunas que não possuem as propriedades desejadas.
+- `dataframe`: DataFrame containing the data to be filtered.
 
-### 11. `all_filters(dataframe)`
+**Returns:**
 
-Esta é a função principal que aplica todos os filtros definidos nas funções anteriores em sequência. Ela normaliza os dados, aplica filtros de compostos, propriedades, soma das linhas e remove colunas vazias, mantendo apenas dados relevantes para análise final.
+- **Filtered DataFrame**: Contains only the rows without `NaN` values.
+- **Excluded DataFrame**: Contains the rows that were removed due to `NaN` values.
 
-**Parâmetros:**
-- `dataframe`: DataFrame contendo os dados a serem filtrados.
+### 8. `merge_refractive_index_columns(dataframe)`
 
-**Retorno:**
-- final_df: DataFrame filtrado final, contendo apenas as colunas e linhas que atendem a todos os critérios (compostos, propriedades desejadas e somatório das linhas próximo de 100).
-- excluded_empty_columns: DataFrame com as colunas removidas por serem inteiramente vazias.
-- excluded_sumlines: DataFrame com as linhas removidas devido ao somatório fora da faixa (98 a 102).
-- excluded_plus_columns: DataFrame com as colunas removidas que contêm o caractere '+' no nome.
-- excluded_rows_with_na: DataFrame com as linhas removidas devido a valores NaN
+Merges multiple refractive index columns into a single column. This is useful when you have multiple columns representing the same property and want to consolidate them.
+
+**Parameters:**
+
+- `dataframe`: DataFrame containing the data to be processed.
+
+**Returns:**
+
+- **Merged DataFrame**: DataFrame with refractive index columns merged into one.
+- **Refractive Only DataFrame**: Contains only the refractive index columns and relevant data.
+
+### 9. `remover_linhas_0(dataframe)`
+
+Removes rows where the sum of the values equals zero. This helps to eliminate rows that do not contribute meaningful data.
+
+**Parameters:**
+
+- `dataframe`: DataFrame containing the data to be filtered.
+
+**Returns:**
+
+- **Non-null Rows DataFrame**: Contains only the rows where the sum is not zero.
+- **Null Rows DataFrame**: Contains the rows where the sum equals zero.
+
+### 10. `apply_all_filters(dataframe)`
+
+This is the main function that applies all the previously defined filters in sequence. It normalizes the data, applies filters for compounds, properties, sum of rows, and removes empty columns, retaining only data relevant for final analysis.
+
+**Parameters:**
+
+- `dataframe`: DataFrame containing the data to be filtered.
+
+**Returns:**
+
+- **Final Filtered DataFrame**: Contains only the columns and rows that meet all criteria (desired compounds, properties, and sum of rows close to 100).
+- **Excluded DataFrames**:
+  - `excluded_empty`: Columns removed for being entirely empty.
+  - `excluded_sum`: Rows removed due to the sum being outside the range.
+  - `excluded_plus`: Columns removed because they contain the `'+'` character.
+  - `excluded_nan`: Rows removed due to `NaN` values.
+- **Additional DataFrames**:
+  - `refractive_only`: DataFrame containing compounds and refractive indices only.
+  - `dataframe_compounds_without_properties`: Compounds without associated properties.
+
+## Usage
+
+1. Ensure you have the following directory structure:
+
+   ```
+   data/
+     patents/
+       merged_df.csv
+     filtered/
+   json/
+     properties.json
+   ```
+
+2. Place your `merged_df.csv` file inside `data/patents/` and `properties.json` inside `json/`. The `properties.json` file should contain a key `"desired_compounds"` with a list of the compounds you wish to filter.
+
+3. Run the script:
+
+   ```bash
+   python script_name.py
+   ```
+
+4. Processed files will be saved in `data/filtered/`.
+
+## Output Files
+
+Saved in `data/filtered/`:
+
+- `final_df.csv`: Final filtered DataFrame after all filters have been applied.
+- `excluded_by_removeemptycolumns.csv`: Columns removed because they were entirely zeros.
+- `excluded_by_sumlines.csv`: Rows removed because their sums did not meet the criteria.
+- `excluded_by_filterbynotplus.csv`: Columns removed because they contained the `'+'` character.
+- `excluded_by_removerowswithna.csv`: Rows removed due to containing `NaN` values.
+- `compounds_and_refractive_only_df.csv`: DataFrame containing compounds and refractive indices only.
+- `dataframe_compounds_without_properties.csv`: Compounds without associated properties.
+
+## Processing Summary
+
+The script provides a summary of the data processing steps, displaying the sizes of the original and resulting DataFrames.
+
+---
+
+By following this guide, you should be able to filter and analyze your chemical compound data effectively using the provided functions.
