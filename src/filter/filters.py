@@ -144,14 +144,14 @@ def merge_refractive_index_columns(dataframe):
 
 def remover_linhas_0(dataframe):
     """
-    Remove linhas que a soma é igual a 0.
+    Removes rows where the sum is equal to 0.
     Returns:
-    - DataFrame só com linhas não nulas
-    - DataFrame só com linhas nulas
+    - DataFrame with only non-null rows.
+    - DataFrame with only null rows.
     """
-    dataframe_sem_linha_nula = dataframe[dataframe.sum(axis=1) != 0]
-    dataframe_com_linha_nula = dataframe[dataframe.sum(axis=1) == 0]
-    return dataframe_sem_linha_nula, dataframe_com_linha_nula
+    dataframe_without_null_rows = dataframe[dataframe.sum(axis=1) != 0]
+    dataframe_with_null_rows = dataframe[dataframe.sum(axis=1) == 0]
+    return dataframe_without_null_rows, dataframe_with_null_rows
 
 def apply_all_filters(dataframe):
     """
@@ -160,35 +160,35 @@ def apply_all_filters(dataframe):
     - Filtered DataFrame.
     - Additional DataFrames representing excluded data at each step.
     """
-    column_ids = dataframe.pop('IDS') # Tira e armazena a coluna IDS do dataframe original  
+    column_ids = dataframe.pop('IDS')  # Remove and store the IDS column from the original dataframe  
     
-    dataframe = clean_and_fill_zeros(dataframe) # Troca '—' e NaN por 0
-    dataframe, excluded_empty = remove_columns_with_only_zeros(dataframe) # Remove colunas só com 0
-    compounds_df, _ = filter_by_compounds(dataframe) # Gera dataframe só com compostos
-    rows_sum_100_compounds, excluded_sum = filter_rows_by_sum(compounds_df) # Gera dataframe com compostos que somam 100
-    properties_df, _ = filter_columns_by_properties(dataframe) # Gera dataframe só com propriedades
-    non_null_properties_rows, null_properties_rows = remover_linhas_0(properties_df) # Remove linhas nulas das propriedades 
-    rows_sum_100_compounds_original = rows_sum_100_compounds.copy() # *Correção: Preserva uma cópia original*
-    rows_sum_100_compounds = rows_sum_100_compounds[~rows_sum_100_compounds.index.isin(null_properties_rows.index)] # Remove compostos sem propriedades
-    compounds_and_properties = pd.concat([rows_sum_100_compounds, non_null_properties_rows], axis=1) # Concatena df de compostos e propriedades
+    dataframe = clean_and_fill_zeros(dataframe)  # Replace '—' and NaN with 0
+    dataframe, excluded_empty = remove_columns_with_only_zeros(dataframe)  # Remove columns with only 0
+    compounds_df, _ = filter_by_compounds(dataframe)  # Generate dataframe with only compounds
+    rows_sum_100_compounds, excluded_sum = filter_rows_by_sum(compounds_df)  # Generate dataframe with compounds summing to 100
+    properties_df, _ = filter_columns_by_properties(dataframe)  # Generate dataframe with only properties
+    non_null_properties_rows, null_properties_rows = remover_linhas_0(properties_df)  # Remove null rows from properties 
+    rows_sum_100_compounds_original = rows_sum_100_compounds.copy()  # *Correction: Preserve an original copy*
+    rows_sum_100_compounds = rows_sum_100_compounds[~rows_sum_100_compounds.index.isin(null_properties_rows.index)]  # Remove compounds without properties
+    compounds_and_properties = pd.concat([rows_sum_100_compounds, non_null_properties_rows], axis=1)  # Concatenate compounds and properties df
     final_filtered, excluded_plus = filter_columns_without_plus(compounds_and_properties)
     final_filtered, excluded_nan = remove_rows_with_nan(final_filtered)
     final_filtered, refractive_only = merge_refractive_index_columns(final_filtered)
 
-    #Seleciona compostos sem propriedades a partir da cópia original
-    compostos_sem_propriedades = rows_sum_100_compounds_original[rows_sum_100_compounds_original.index.isin(null_properties_rows.index)]
-    dataframe_compostos_sem_propriedade = pd.concat([compostos_sem_propriedades, null_properties_rows], axis=1)
-    # Utiliza .loc para alinhar as IDs com os índices do DataFrame
-    dataframe_compostos_sem_propriedade['IDS'] = column_ids.loc[dataframe_compostos_sem_propriedade.index].values
-    final_filtered['IDS'] = column_ids.loc[final_filtered.index].values  # *Correção: Usa .loc para alinhamento correto*
+    # Select compounds without properties from the original copy
+    compounds_without_properties = rows_sum_100_compounds_original[rows_sum_100_compounds_original.index.isin(null_properties_rows.index)]
+    dataframe_compounds_without_properties = pd.concat([compounds_without_properties, null_properties_rows], axis=1)
+    # Use .loc to align IDs with the DataFrame indices
+    dataframe_compounds_without_properties['IDS'] = column_ids.loc[dataframe_compounds_without_properties.index].values
+    final_filtered['IDS'] = column_ids.loc[final_filtered.index].values  # *Correction: Use .loc for correct alignment*
     refractive_only['IDS'] = column_ids.loc[refractive_only.index].values
-    return final_filtered, excluded_empty, excluded_sum, excluded_plus, excluded_nan, refractive_only, dataframe_compostos_sem_propriedade
+    return final_filtered, excluded_empty, excluded_sum, excluded_plus, excluded_nan, refractive_only, dataframe_compounds_without_properties
 
 
-# Aplicando todos os filtros ao DataFrame original
-final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna, compounds_and_refractive_only_df, dataframe_compostos_sem_propriedade = apply_all_filters(dataframe_original)
+# Applying all filters to the original DataFrame
+final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna, compounds_and_refractive_only_df, dataframe_compounds_without_properties = apply_all_filters(dataframe_original)
 
-# Salvando os resultados em arquivos CSV
+# Saving the results to CSV files
 filtered_path = Path("data/filtered")
 final_filtered.to_csv(filtered_path / 'final_df.csv', index=False)
 excluded_by_removeemptycolumns.to_csv(filtered_path / 'excluded_by_removeemptycolumns.csv', index=False)
@@ -196,15 +196,15 @@ excluded_by_sumlines.to_csv(filtered_path / 'excluded_by_sumlines.csv', index=Fa
 excluded_by_filterbynotplus.to_csv(filtered_path / 'excluded_by_filterbynotplus.csv', index=False)
 excluded_by_removerowswithna.to_csv(filtered_path / 'excluded_by_removerowswithna.csv', index=False)
 compounds_and_refractive_only_df.to_csv(filtered_path / 'compounds_and_refractive_only_df.csv', index=False)
-dataframe_compostos_sem_propriedade.to_csv(filtered_path / 'dataframe_compostos_sem_propriedade.csv', index=False)
+dataframe_compounds_without_properties.to_csv(filtered_path / 'dataframe_compounds_without_properties.csv', index=False)
 
-# Exibindo resumo do processamento
-print("\nResumo do processamento:")
-print(f"{'Tamanho do DataFrame original:':<50} {dataframe_original.shape}")
-print(f"{'Tamanho do DataFrame final filtrado:':<50} {final_filtered.shape}")
-print(f"{'Excluídos (colunas vazias):':<50} {excluded_by_removeemptycolumns.shape}")
-print(f"{'Excluídos (soma das linhas):':<50} {excluded_by_sumlines.shape}")
-print(f"{'Excluídos (colunas contendo +):':<50} {excluded_by_filterbynotplus.shape}")
-print(f"{'Excluídos (linhas com NaN):':<50} {excluded_by_removerowswithna.shape}")
-print(f"{'DataFrame com compostos e índices de refração:':<50} {compounds_and_refractive_only_df.shape}")
-print(f"{'DataFrame com compostos sem propriedades:':<50} {dataframe_compostos_sem_propriedade.shape}") 
+# Displaying processing summary
+print("\nProcessing Summary:")
+print(f"{'Original DataFrame size:':<50} {dataframe_original.shape}")
+print(f"{'Final filtered DataFrame size:':<50} {final_filtered.shape}")
+print(f"{'Excluded (empty columns):':<50} {excluded_by_removeemptycolumns.shape}")
+print(f"{'Excluded (row sums):':<50} {excluded_by_sumlines.shape}")
+print(f"{'Excluded (columns containing +):':<50} {excluded_by_filterbynotplus.shape}")
+print(f"{'Excluded (rows with NaN):':<50} {excluded_by_removerowswithna.shape}")
+print(f"{'DataFrame with compounds and refractive indices:':<50} {compounds_and_refractive_only_df.shape}")
+print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}") 
