@@ -48,7 +48,7 @@ with properties_file.open(encoding="utf-8") as f:
                          for compound in properties_data.get("desired_compounds", [])]
 
 # Iterate through all CSV files in the specified structure
-for table_file in input_path.rglob("/processed/splitted/.csv"):
+for table_file in input_path.rglob("*/processed/splitted/*.csv"):
     try:
         # Read the CSV file into lines
         with open(table_file, 'r', encoding='utf-8') as file:
