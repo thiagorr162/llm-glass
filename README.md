@@ -1,27 +1,26 @@
 # Google Patents Scraping
 
-Aqui descrevemos como rodar os códigos para coleta de dados de patentes de vidros no Google Patents.
+Here we describe how to run the scripts for collecting glass patent data from Google Patents.
 
-## Baixando as patents
+## Downloading the Patents
 
-Para iniciar, execute o seguinte comando:
+To get started, execute the following command:
 
 ```
 python src/scraping/get_patent_info.py -c {country} -w {wait} -p {n_pages} -k ["glass", "refractive"] --selenium_path {path_to_selenium_driver}
 ```
 
+This script will download patents directly from Google Patents, filtering by the following parameters:
 
-Este script irá realizar o download de patentes diretamente do Google Patents, filtrando pelos seguintes parâmetros:
+- **Country**: specified by the `{country}` argument
+- **Wait time between requests**: adjustable with the `{wait}` parameter
+- **Maximum number of pages**: set by `{n_pages}`
+- **Keywords**: such as "glass" and "refractive," which can be adapted as needed
+- **Directory for the Selenium driver**: here you need to specify where the Selenium WebDriver executable is located, defined by `{path_to_selenium_driver}`
 
-- **País**: especificado pelo argumento `{country}`
-- **Tempo de espera entre requisições**: ajustável com o parâmetro `{wait}`
-- **Número máximo de páginas**: configurado por `{n_pages}`
-- **Palavras-chave**: como "glass" e "refractive", que podem ser adaptadas conforme necessário.
-- **Diretório para driver do Selenium**: aqui você precisa dizer onde está o webdriver executável defindo em `{path_to_selenium_driver}`. 
+## Processing the Patents
 
-## Processando as patentes
-
-Para processar as patents, você deve rodar os seguintes códigos, nessa ordem:
+To process the patents, you must run the following scripts in this order:
 
 ```
 src/data/read_html_tables.py
