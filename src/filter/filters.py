@@ -108,6 +108,63 @@ def remove_rows_with_nan(dataframe):
     excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
     return filtered_df, excluded_df
 
+import re
+
+import re
+
+def is_refractive_index_column(col_name: str) -> bool:
+    """
+    Determines if a column name is related to the refractive index.
+    Excludes columns containing 'density'.
+    Expands the original conditions to include variations like "Ref. Ind.", "Refr.index",
+    "Index (@ 633 nm)", and others.
+    """
+    lower_name = col_name.lower()
+
+    # Exclude columns related to density
+    if 'density' in lower_name:
+        return False
+
+    # If the column contains "refrac" or "refractive"
+    if "refrac" in lower_name:
+        return True
+
+    # Check for "ref." followed by "ind" as an abbreviation for "refractive index"
+    # Examples: "Ref. Ind.", "Refr.ind", "Ref index", "Refr.index"
+    if re.search(r"ref(\.?)(\s+)?ind", lower_name) or "refr.index" in lower_name:
+        return True
+
+    # Check for "ref" and "index" separated but within the same expression
+    # e.g., "Ref Index", "Ref Index nd"
+    if "ref" in lower_name and "index" in lower_name:
+        return True
+
+    # "ri" as a standalone word
+    if re.search(r"\bri\b", lower_name):
+        return True
+
+    # "nd" or "nD" as standalone words
+    if re.search(r"\bnd\b", lower_name, re.IGNORECASE):
+        return True
+
+    # "nXYZ" where XYZ are digits, indicating refractive index at a specific wavelength
+    if re.search(r"\bn\d+(\.\d+)?\b", lower_name):
+        return True
+
+    # "n (at XXX nm)"
+    if re.search(r"\bn\s*\(at\s*\d+\s*nm\)", lower_name):
+        return True
+
+    # Consider columns with "index" and a wavelength pattern like "(@ XXX nm)" as refractive index
+    if "index" in lower_name and re.search(r"\(@\s*\d+\s*nm\)", lower_name):
+        return True
+
+    # Handle expressions like "ri @" within the name
+    if re.search(r"ri\s*@", lower_name):
+        return True
+
+    return False
+
 def merge_refractive_index_columns(dataframe):
     """
     Merges refractive index columns into a single column.
@@ -125,11 +182,7 @@ def merge_refractive_index_columns(dataframe):
     desired_compounds = data["desired_compounds"]
     filtered_df = filtered_df[[col for col in filtered_df.columns if col not in desired_compounds]]
 
-    def is_refractive_index_column(col_name):
-        if 'density' in col_name.lower():
-            return False
-        return bool(re.search(r'(N|RI)', col_name, re.IGNORECASE)) or bool(re.search(r'refrac', col_name, re.IGNORECASE))
-
+    # Agora utiliza a função aprimorada
     filtered_df = filtered_df[[col for col in filtered_df.columns if is_refractive_index_column(col)]]
 
     non_zero_counts = (filtered_df != 0).sum(axis=1)
@@ -137,8 +190,19 @@ def merge_refractive_index_columns(dataframe):
     summed_refractive[non_zero_counts > 1] = -1
 
     multiple_indices = filtered_df.where(non_zero_counts > 1, other=0)
-    merged_df = pd.concat([original_df.drop(columns=filtered_df.columns), summed_refractive.rename("TERMINA AQUI / Refractive Index"), multiple_indices], axis=1)
-    refractive_only = pd.concat([compounds_df, summed_refractive.rename("TERMINA AQUI / Refractive Index"), multiple_indices], axis=1)
+    merged_df = pd.concat([
+        original_df.drop(columns=filtered_df.columns),
+        summed_refractive.rename("TERMINA AQUI / Refractive Index"),
+        multiple_indices
+    ], axis=1)
+    
+    refractive_only = pd.concat([
+        compounds_df,
+        summed_refractive.rename("TERMINA AQUI / Refractive Index"),
+        multiple_indices
+    ], axis=1)
+
+    refractive_only = refractive_only[refractive_only["TERMINA AQUI / Refractive Index"] != 0]
 
     return merged_df, refractive_only
 
@@ -168,7 +232,7 @@ def apply_all_filters(dataframe):
     rows_sum_100_compounds, excluded_sum = filter_rows_by_sum(compounds_df)  # Generate dataframe with compounds summing to 100
     properties_df, _ = filter_columns_by_properties(dataframe)  # Generate dataframe with only properties
     non_null_properties_rows, null_properties_rows = remover_linhas_0(properties_df)  # Remove null rows from properties 
-    rows_sum_100_compounds_original = rows_sum_100_compounds.copy()  # *Correction: Preserve an original copy*
+    rows_sum_100_compounds_original = rows_sum_100_compounds.copy()  # Correction: Preserve an original copy
     rows_sum_100_compounds = rows_sum_100_compounds[~rows_sum_100_compounds.index.isin(null_properties_rows.index)]  # Remove compounds without properties
     compounds_and_properties = pd.concat([rows_sum_100_compounds, non_null_properties_rows], axis=1)  # Concatenate compounds and properties df
     final_filtered, excluded_plus = filter_columns_without_plus(compounds_and_properties)
@@ -180,7 +244,7 @@ def apply_all_filters(dataframe):
     dataframe_compounds_without_properties = pd.concat([compounds_without_properties, null_properties_rows], axis=1)
     # Use .loc to align IDs with the DataFrame indices
     dataframe_compounds_without_properties['IDS'] = column_ids.loc[dataframe_compounds_without_properties.index].values
-    final_filtered['IDS'] = column_ids.loc[final_filtered.index].values  # *Correction: Use .loc for correct alignment*
+    final_filtered['IDS'] = column_ids.loc[final_filtered.index].values  # Correction: Use .loc for correct alignment
     refractive_only['IDS'] = column_ids.loc[refractive_only.index].values
     return final_filtered, excluded_empty, excluded_sum, excluded_plus, excluded_nan, refractive_only, dataframe_compounds_without_properties
 
@@ -207,4 +271,4 @@ print(f"{'Excluded (row sums):':<50} {excluded_by_sumlines.shape}")
 print(f"{'Excluded (columns containing +):':<50} {excluded_by_filterbynotplus.shape}")
 print(f"{'Excluded (rows with NaN):':<50} {excluded_by_removerowswithna.shape}")
 print(f"{'DataFrame with compounds and refractive indices:':<50} {compounds_and_refractive_only_df.shape}")
-print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}") 
+print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}")

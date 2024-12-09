@@ -8,7 +8,7 @@
 /out
 /personal
 /visualization
-
+/data/filtered
 # Python stuff
 *.ipynb_checkpoints/
 *.mypy_cache/

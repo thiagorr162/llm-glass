@@ -1,7 +1,6 @@
 import argparse
 import json
 from pathlib import Path
-
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
@@ -11,10 +10,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# python src/scraping/get_patent_info.py -p {n_pages} 
+# python src/scraping/get_patent_info.py -p {n_pages} -w {wait} -k {keywords} -c {country} -r {results_number}
 
 parser = argparse.ArgumentParser(
-    description="Busca de patentes no Google Patents com base em palavras-chave e número de páginas."
+    description="Patent search on Google Patents based on keywords and page numbers."
 )
 
 parser.add_argument(
@@ -22,41 +21,41 @@ parser.add_argument(
     "-p",
     type=int,
     default=2,
-    help="Número de páginas para procurar (default: 2)",
+    help="Number of pages to search (default: 2)",
 )
 parser.add_argument(
-    "--wait",
+    "--wait_time",  
     "-w",
     type=int,
-    default=10,
-    help="Segundos para esperar o carregamento das patentes (default: 10)",
+    default=0,
+    help="Seconds to wait after the patent has loaded(default: 0)",
 )
 parser.add_argument(
     "--keywords",
     "-k",
     nargs="+",
     default=["glass", "refractive"],
-    help="Lista de palavras-chave para busca (default: ['glass', 'refractive'])",
+    help="List of keywords for search (default: ['glass', 'refractive'])",
 )
 parser.add_argument(
     "--country",
     "-c",
     type=str,
     default=None,
-    help="País para buscar patentes (default: None, buscar em qualquer país).",
+    help="Country to search for patents (default: None, search in any country).",
 )
 parser.add_argument(
     "--selenium_path",
     type=str,
     default="src/scraping/geckodriver.exe",
-    help="Caminho para o driver do Selenium.",
+    help="Path to the Selenium driver.",
 )
 parser.add_argument(
     "--results",
     "-r",
     type=int,
     default=100,
-    help="Número de resultados por página na busca (default: 100)",
+    help="Number of results per page in the search (default: 100)",
 )
 
 args = parser.parse_args()
@@ -64,7 +63,7 @@ results = args.results
 keywords = args.keywords
 pages = args.pages
 country = args.country
-
+wait_time = args.wait_time  
 all_urls = []
 
 geckodriver_path = args.selenium_path
@@ -84,23 +83,9 @@ def construct_search_url(keywords, page, results, country=None):
         url += f"&country={country.upper()}"
     return url
 
-for page in range(1, pages + 1):
-    print(f"Getting links for page: {page}")
-
-    search_url = construct_search_url(keywords, page, results, country)
-    browser.get(search_url)
-
-    wait = WebDriverWait(browser, timeout=args.wait, poll_frequency=0.5)
-
-    patent_elements = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "search-result-item")))
-
-    for patent in patent_elements:
-        state_modifier = patent.find_element(By.CSS_SELECTOR, "state-modifier")
-        data_result = state_modifier.get_attribute("data-result")
-        full_url = "https://patents.google.com/" + data_result
-        all_urls.append(full_url)
-
-print("All links done!\n")
+# Loading URLs from the file
+with open('C:/Users/thoma/Downloads/urls_eric.txt', 'r') as file:
+    all_urls = [linha.strip() for linha in file]
 
 output_dir = Path("data/patents")
 output_dir.mkdir(parents=True, exist_ok=True)
@@ -114,10 +99,11 @@ for url in all_urls:
     output_file = output_path / (file_name + ".json")
 
     if output_file.exists():
-        print(f"Arquivo {output_file} já existe. Pulando a criação.")
+        print(f"File {output_file} already exists. Skipping creation.")
         continue
 
     browser.get(url)
+    wait = WebDriverWait(browser, timeout=wait_time, poll_frequency=0.5)
     wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
 
     def get_meta_content(selector):
@@ -171,3 +157,5 @@ for url in all_urls:
         json.dump(patent_data, f, ensure_ascii=False, indent=4)
 
 browser.quit()
+
+print("Operation completed successfully.") 
