@@ -108,10 +108,6 @@ def remove_rows_with_nan(dataframe):
     excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
     return filtered_df, excluded_df
 
-import re
-
-import re
-
 def is_refractive_index_column(col_name: str) -> bool:
     """
     Determines if a column name is related to the refractive index.
