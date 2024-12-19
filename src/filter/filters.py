@@ -189,17 +189,16 @@ def merge_refractive_index_columns(dataframe):
     summed_refractive = filtered_df.sum(axis=1, skipna=True)
     summed_refractive[non_zero_counts > 1] = -1
 
-    multiple_indices = filtered_df.where(non_zero_counts > 1, other=0)
     merged_df = pd.concat([
         original_df.drop(columns=filtered_df.columns),
         summed_refractive.rename("TERMINA AQUI / Refractive Index"),
-        multiple_indices
+        filtered_df
     ], axis=1)
     
     refractive_only = pd.concat([
         compounds_df,
         summed_refractive.rename("TERMINA AQUI / Refractive Index"),
-        multiple_indices
+        filtered_df
     ], axis=1)
 
     refractive_only = refractive_only[refractive_only["TERMINA AQUI / Refractive Index"] != 0]
@@ -255,20 +254,11 @@ final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_b
 # Saving the results to CSV files
 filtered_path = Path("data/filtered")
 final_filtered.to_csv(filtered_path / 'final_df.csv', index=False)
-excluded_by_removeemptycolumns.to_csv(filtered_path / 'excluded_by_removeemptycolumns.csv', index=False)
-excluded_by_sumlines.to_csv(filtered_path / 'excluded_by_sumlines.csv', index=False)
-excluded_by_filterbynotplus.to_csv(filtered_path / 'excluded_by_filterbynotplus.csv', index=False)
-excluded_by_removerowswithna.to_csv(filtered_path / 'excluded_by_removerowswithna.csv', index=False)
 compounds_and_refractive_only_df.to_csv(filtered_path / 'compounds_and_refractive_only_df.csv', index=False)
-dataframe_compounds_without_properties.to_csv(filtered_path / 'dataframe_compounds_without_properties.csv', index=False)
+
 
 # Displaying processing summary
 print("\nProcessing Summary:")
 print(f"{'Original DataFrame size:':<50} {dataframe_original.shape}")
 print(f"{'Final filtered DataFrame size:':<50} {final_filtered.shape}")
-print(f"{'Excluded (empty columns):':<50} {excluded_by_removeemptycolumns.shape}")
-print(f"{'Excluded (row sums):':<50} {excluded_by_sumlines.shape}")
-print(f"{'Excluded (columns containing +):':<50} {excluded_by_filterbynotplus.shape}")
-print(f"{'Excluded (rows with NaN):':<50} {excluded_by_removerowswithna.shape}")
 print(f"{'DataFrame with compounds and refractive indices:':<50} {compounds_and_refractive_only_df.shape}")
-print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}")
