@@ -165,3 +165,13 @@ excluded_by_removerowswithna.to_csv(FILTERED_PATH / 'excluded_by_removerowswithn
 compounds_and_refractive_only_df.to_csv(FILTERED_PATH / 'compounds_and_refractive_only_df.csv', index=False)
 dataframe_compounds_without_properties.to_csv(FILTERED_PATH / 'dataframe_compounds_without_properties.csv', index=False)
 
+# Displaying processing summary
+print("\nProcessing Summary:")
+print(f"{'Original DataFrame size:':<50} {dataframe_original.shape}")
+print(f"{'Final filtered DataFrame size:':<50} {final_filtered.shape}")
+print(f"{'Excluded (empty columns):':<50} {excluded_by_removeemptycolumns.shape}")
+print(f"{'Excluded (row sums):':<50} {excluded_by_sumlines.shape}")
+print(f"{'Excluded (columns containing +):':<50} {excluded_by_filterbynotplus.shape}")
+print(f"{'Excluded (rows with NaN):':<50} {excluded_by_removerowswithna.shape}")
+print(f"{'DataFrame with compounds and refractive indices:':<50} {compounds_and_refractive_only_df.shape}")
+print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}")
