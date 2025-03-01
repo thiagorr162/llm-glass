@@ -108,5 +108,3 @@ pip install pandas
 - Use `filters.py` if you need a **single** robust (but slower) solution; otherwise, use `filter_by_properties_0.1` followed by `filter_by_RI_0.1` for a more **modular** approach.
 
 ---
-
-By following these instructions, you can filter and analyze your chemical compound data to retain only relevant properties, unify refractive index columns, and produce clean, concise CSV outputs for further research and analysis.
