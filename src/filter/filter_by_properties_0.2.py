@@ -201,7 +201,7 @@ if __name__ == "__main__":
     filtered_path.mkdir(parents=True, exist_ok=True)
     
     # Save the final DataFrame as a CSV file
-    final_df.to_csv(filtered_path / "final_df.csv_0.2", index=False)
+    final_df.to_csv(filtered_path / "final_df.csv", index=False)
     
     # Print a success message with the shape (number of rows and columns) of the final DataFrame
-    print(f"final_df_0.2.csv generated successfully: {final_df.shape[0]} rows and {final_df.shape[1]} columns.")
+    print(f"final_df.csv generated successfully: {final_df.shape[0]} rows and {final_df.shape[1]} columns.")
