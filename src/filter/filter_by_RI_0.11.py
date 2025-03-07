@@ -82,10 +82,10 @@ def merge_refractive_index_columns(dataframe, desired_compounds):
     summed_refractive[non_zero_counts > 1] = -1
 
     # Create a new DataFrame (merged_df) by dropping the original RI columns
-    # and adding the merged RI column (renamed as "TERMINA AQUI / Refractive Index")
+    # and adding the merged RI column (renamed as "Summarized Refractive Index")
     merged_df = pd.concat([
         original_df.drop(columns=ri_df.columns),
-        summed_refractive.rename("TERMINA AQUI / Refractive Index")
+        summed_refractive.rename("Summarized Refractive Index")
     ], axis=1)
 
     # Build a DataFrame that includes:
@@ -95,10 +95,10 @@ def merge_refractive_index_columns(dataframe, desired_compounds):
     refractive_only = pd.concat([
         compounds_df,
         ri_df,
-        summed_refractive.rename("TERMINA AQUI / Refractive Index")
+        summed_refractive.rename("Summarized Refractive Index")
     ], axis=1)
     # Optionally, remove rows where the merged RI column is 0 (indicating no RI data available)
-    refractive_only = refractive_only[refractive_only["TERMINA AQUI / Refractive Index"] != 0]
+    refractive_only = refractive_only[refractive_only["Summarized Refractive Index"] != 0]
 
     return merged_df, refractive_only
 
@@ -130,8 +130,8 @@ if __name__ == "__main__":
     compounds_and_refractive_only['IDS'] = ids_series.loc[compounds_and_refractive_only.index].values
     
     # 4. Save the resulting DataFrames as CSV files
-    #final_df_atualizado.to_csv(filtered_path / "final_df_atualizado.csv", index=False)
-    compounds_and_refractive_only.to_csv(filtered_path / "compounds_and_refractive_only_df.csv", index=False)
+  #  final_df_atualizado.to_csv(filtered_path / "final_df_atualizado.csv", index=False)
+    compounds_and_refractive_only.to_csv(filtered_path / "compounds_and_refractive_only_df_0.11.csv", index=False)
     
     # Print messages indicating the successful generation of files
     print("Geração de 'compounds_and_refractive_only_df.csv' concluída com sucesso.")
