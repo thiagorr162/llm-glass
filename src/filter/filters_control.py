@@ -3,137 +3,270 @@ import pandas as pd
 from pathlib import Path
 import re
 
-# ---------------------------
-# Setup: Load Files and Data
-# ---------------------------
-# Define the base path for the patents data and where the filtered data will be saved.
+# Load files
 BASE_PATH = Path("data/patents")
 csv_path = BASE_PATH / "merged_df.csv"
 FILTERED_PATH = Path("data/filtered")
 
-# Load the original DataFrame from a CSV file.
-# The CSV file contains all the raw data we need to filter.
+# Load data
 dataframe_original = pd.read_csv(csv_path, low_memory=False)
-
-# Load the JSON file that contains configuration data.
-# This file holds settings like the list of desired compounds.
 json_path = Path("json/properties.json")
 with open(json_path, 'r') as file:
     data = json.load(file)
 
-# ---------------------------
-# Function Definitions
-# ---------------------------
-
 def filter_by_compounds(dataframe):
     """
     Filters columns based on a predefined list of desired compounds.
-    It keeps only the columns whose names appear in the desired compounds list.
-    
     Returns:
-    - A DataFrame containing only the desired compound columns.
-    - A DataFrame with the columns that were excluded.
+    - Filtered DataFrame with desired compounds.
+    - DataFrame with excluded columns.
     """
-    # Get the list of desired compounds from the JSON data.
     desired_compounds = data["desired_compounds"]
-    # Create a list of columns that match the desired compounds.
     filtered_columns = [col for col in dataframe.columns if col in desired_compounds]
-    # Identify columns that are not in the desired compounds list.
     excluded_columns = dataframe.columns.difference(filtered_columns)
     return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def filter_columns_without_plus(dataframe):
     """
     Filters columns based on whether their names contain the '+' character.
-    This is useful when you want to exclude columns with special characters.
-    
     Returns:
-    - A DataFrame with columns that do NOT contain the '+' character.
-    - A DataFrame with columns that DO contain the '+' character.
+    - Filtered DataFrame (columns without '+').
+    - DataFrame with excluded columns (containing '+').
     """
-    # Keep columns without '+' in their names.
     filtered_columns = [col for col in dataframe.columns if "+" not in col]
-    # Identify columns that contain '+'.
     excluded_columns = [col for col in dataframe.columns if "+" in col]
     return dataframe[filtered_columns], dataframe[excluded_columns]
 
 def clean_and_fill_zeros(dataframe):
     """
-    Cleans the DataFrame by:
-    - Replacing the string '—' with 0.
-    - Filling any NaN (missing) values with 0.
-    - Converting all columns to numeric values.
-    
-    This ensures that the DataFrame can be safely used for mathematical operations.
+    Replaces '—' and NaN values with 0, and ensures all data is numeric.
     """
-    # Replace '—' with 0 and fill missing values.
     dataframe = dataframe.replace('—', 0).fillna(0)
-    # Convert all values to numeric, coercing errors to NaN and then replacing them with 0.
     dataframe = dataframe.apply(pd.to_numeric, errors='coerce').fillna(0)
     return dataframe
 
 def remove_columns_with_only_zeros(dataframe):
     """
-    Removes columns that contain only zeros since they don't provide useful information.
-    
+    Removes columns that contain only zeros.
     Returns:
-    - A DataFrame without the columns that are completely 0.
-    - A DataFrame of the columns that were removed (all zeros).
+    - DataFrame without columns containing only zeros.
+    - DataFrame with excluded columns.
     """
-    # Identify columns where every entry is 0.
     empty_columns = dataframe.columns[(dataframe == 0).all()]
     excluded_columns_df = dataframe[empty_columns]
-    # Drop those columns from the original DataFrame.
     filtered_dataframe = dataframe.drop(columns=empty_columns)
     return filtered_dataframe, excluded_columns_df
 
 def filter_rows_by_sum(dataframe, tolerance=2):
     """
-    Filters rows based on the sum of their values.
-    The function keeps rows that sum to approximately 100,
-    or rows that sum to approximately 1 (which are then scaled to 100).
-    
+    Filters rows based on their sum.
+    Rows summing close to 100 are kept, and rows summing close to 1 are scaled to 100.
     Returns:
-    - A DataFrame with rows that have sums approximately equal to 100.
-    - A DataFrame with rows that were excluded.
+    - DataFrame with rows summing approximately to 100.
+    - DataFrame with excluded rows.
     """
-    # Calculate the sum of each row.
     row_sums = dataframe.sum(axis=1)
-    tolerance_100 = tolerance      # Tolerance for sums around 100.
-    tolerance_1 = tolerance / 100  # Tolerance for sums around 1 (to be scaled).
+    tolerance_100 = tolerance
+    tolerance_1 = tolerance / 100
 
-    # Create masks for rows that sum near 100 or near 1.
     mask_sum_100 = (row_sums >= 100 - tolerance_100) & (row_sums <= 100 + tolerance_100)
     mask_sum_1 = (row_sums >= 1 - tolerance_1) & (row_sums <= 1 + tolerance_1)
 
-    # Extract rows with sums near 100.
     rows_sum_100 = dataframe.loc[mask_sum_100]
-    # Extract rows with sums near 1 and scale them up by multiplying by 100.
     rows_sum_1_scaled = dataframe.loc[mask_sum_1] * 100
 
-    # Combine both groups of rows.
     combined_rows = pd.concat([rows_sum_100, rows_sum_1_scaled])
-    # The excluded rows are those that do not meet either criterion.
     excluded_rows = dataframe.drop(combined_rows.index)
 
     return combined_rows, excluded_rows
 
 def filter_columns_by_properties(dataframe):
     """
-    Filters columns based on a predefined list of property keywords.
-    Only columns whose names contain one of the keywords will be kept.
-    
+    Filters columns based on a predefined list of properties.
     Returns:
-    - A DataFrame with columns that match the property keywords.
-    - A DataFrame with columns that do not match.
+    - DataFrame with columns matching properties.
+    - DataFrame with excluded columns.
     """
-    # List of keywords related to material properties.
-    properties = ["refractive", "abbe", "liquidus", "c.", "density", "α", "modulus", "fiber", 
-                  "devitrification", "point", "crystallization", "thermal", "mean", 
-                  "glass transition", "crystallinity", "electric", "onset", "transition", 
-                  "permittivity", "iso", "RI", "index", "ref", "nd", "η", "nm", "ratio", 
-                  "n5", "n6", "n7", "n8", "n9"]
-    # Select columns that contain any of the keywords (case-insensitive check).
-    filtered_columns = [col for col in dataframe.columns if any(prop.lower() in col.lower() for prop in properties)]
+    properties = [
+        "refractive", "abbe", "liquidus", "c.", "density", "α", "modulus", "fiber",
+        "devitrification", "point", "crystallization", "thermal", "mean",
+        "glass transition", "crystallinity", "electric", "onset", "transition",
+        "permittivity", "iso", "RI", "index", "ref", "nd", "η", "nm", "ratio",
+        "n5", "n6", "n7", "n8", "n9"
+    ]
+    filtered_columns = [
+        col for col in dataframe.columns
+        if any(prop.lower() in col.lower() for prop in properties)
+    ]
     filtered_dataframe = dataframe[filtered_columns]
-    # The rest of the 
+    excluded_dataframe = dataframe.drop(columns=filtered_columns)
+    return filtered_dataframe, excluded_dataframe
+
+def remove_rows_with_nan(dataframe):
+    """
+    Removes rows containing NaN values.
+    Returns:
+    - DataFrame without NaN rows.
+    - DataFrame with excluded rows.
+    """
+    filtered_df = dataframe.dropna()
+    excluded_df = dataframe.loc[dataframe.isna().any(axis=1)]
+    return filtered_df, excluded_df
+
+def is_refractive_index_column(col_name: str) -> bool:
+    """
+    Determines if a column name is related to the refractive index.
+    Excludes columns containing 'density'.
+    Expands the original conditions to include variations like "Ref. Ind.", "Refr.index",
+    "Index (@ 633 nm)", and others.
+    """
+    lower_name = col_name.lower()
+
+    # Exclude columns related to density
+    if 'density' in lower_name:
+        return False
+
+    # If the column contains "refrac" or "refractive"
+    if "refrac" in lower_name:
+        return True
+
+    # Check for "ref." followed by "ind" as an abbreviation for "refractive index"
+    # Examples: "Ref. Ind.", "Refr.ind", "Ref index", "Refr.index"
+    if re.search(r"ref(\.?)(\s+)?ind", lower_name) or "refr.index" in lower_name:
+        return True
+
+    # Check for "ref" and "index" separated but within the same expression
+    # e.g., "Ref Index", "Ref Index nd"
+    if "ref" in lower_name and "index" in lower_name:
+        return True
+
+    # "ri" as a standalone word
+    if re.search(r"\bri\b", lower_name):
+        return True
+
+    # "nd" or "nD" as standalone words
+    if re.search(r"\bnd\b", lower_name, re.IGNORECASE):
+        return True
+
+    # "nXYZ" where XYZ are digits, indicating refractive index at a specific wavelength
+    if re.search(r"\bn\d+(\.\d+)?\b", lower_name):
+        return True
+
+    # "n (at XXX nm)"
+    if re.search(r"\bn\s*\(at\s*\d+\s*nm\)", lower_name):
+        return True
+
+    # Consider columns with "index" and a wavelength pattern like "(@ XXX nm)" as refractive index
+    if "index" in lower_name and re.search(r"\(@\s*\d+\s*nm\)", lower_name):
+        return True
+
+    # Handle expressions like "ri @" within the name
+    if re.search(r"ri\s*@", lower_name):
+        return True
+
+    return False
+
+def merge_refractive_index_columns(dataframe):
+    """
+    Merges refractive index columns into a single column.
+    Returns:
+    - DataFrame with merged refractive index columns.
+    - DataFrame with only refractive index columns.
+    """
+    original_df = dataframe.copy()
+    compounds_df, _ = filter_by_compounds(dataframe)
+
+    mask_out_of_range = (dataframe != 0) & ((dataframe < 1) | (dataframe > 5))
+    columns_to_drop = mask_out_of_range.any(axis=0)
+    filtered_df = dataframe.loc[:, ~columns_to_drop]
+
+    desired_compounds = data["desired_compounds"]
+    filtered_df = filtered_df[[col for col in filtered_df.columns if col not in desired_compounds]]
+
+    filtered_df = filtered_df[[col for col in filtered_df.columns if is_refractive_index_column(col)]]
+
+    non_zero_counts = (filtered_df != 0).sum(axis=1)
+    summed_refractive = filtered_df.sum(axis=1, skipna=True)
+    summed_refractive[non_zero_counts > 1] = -1
+
+    multiple_indices = filtered_df.where(non_zero_counts > 1, other=0)
+    merged_df = pd.concat([
+        original_df.drop(columns=filtered_df.columns),
+        summed_refractive.rename("TERMINA AQUI / Refractive Index"),
+        multiple_indices
+    ], axis=1)
+    
+    refractive_only = pd.concat([
+        compounds_df,
+        summed_refractive.rename("TERMINA AQUI / Refractive Index"),
+        multiple_indices
+    ], axis=1)
+
+    refractive_only = refractive_only[refractive_only["TERMINA AQUI / Refractive Index"] != 0]
+
+    return merged_df, refractive_only
+
+def remover_linhas_0(dataframe):
+    """
+    Removes rows where the sum is equal to 0.
+    Returns:
+    - DataFrame with only non-null rows.
+    - DataFrame with only null rows.
+    """
+    dataframe_without_null_rows = dataframe[dataframe.sum(axis=1) != 0]
+    dataframe_with_null_rows = dataframe[dataframe.sum(axis=1) == 0]
+    return dataframe_without_null_rows, dataframe_with_null_rows
+
+def apply_all_filters(dataframe):
+    """
+    Applies all filtering steps to the DataFrame.
+    Returns:
+    - Filtered DataFrame.
+    - Additional DataFrames representing excluded data at each step.
+    """
+    column_ids = dataframe.pop('IDS')  # Remove and store the IDS column from the original dataframe  
+    
+    dataframe = clean_and_fill_zeros(dataframe)  # Replace '—' and NaN with 0
+    dataframe, excluded_empty = remove_columns_with_only_zeros(dataframe)  # Remove columns with only 0
+    compounds_df, _ = filter_by_compounds(dataframe)  # Generate dataframe with only compounds
+    rows_sum_100_compounds, excluded_sum = filter_rows_by_sum(compounds_df)  # Generate dataframe with compounds summing to 100
+    properties_df, _ = filter_columns_by_properties(dataframe)  # Generate dataframe with only properties
+    non_null_properties_rows, null_properties_rows = remover_linhas_0(properties_df)  # Remove null rows from properties
+    rows_sum_100_compounds_original = rows_sum_100_compounds.copy()  # Correction: Preserve an original copy
+    rows_sum_100_compounds = rows_sum_100_compounds[~rows_sum_100_compounds.index.isin(null_properties_rows.index)]  # Remove compounds without properties
+    compounds_and_properties = pd.concat([rows_sum_100_compounds, non_null_properties_rows], axis=1)  # Concatenate compounds and properties df
+    final_filtered, excluded_plus = filter_columns_without_plus(compounds_and_properties)
+    final_filtered, excluded_nan = remove_rows_with_nan(final_filtered)
+    final_filtered, refractive_only = merge_refractive_index_columns(final_filtered)
+
+    # Select compounds without properties from the original copy
+    compounds_without_properties = rows_sum_100_compounds_original[rows_sum_100_compounds_original.index.isin(null_properties_rows.index)]
+    dataframe_compounds_without_properties = pd.concat([compounds_without_properties, null_properties_rows], axis=1)
+    dataframe_compounds_without_properties['IDS'] = column_ids.loc[dataframe_compounds_without_properties.index].values
+    final_filtered['IDS'] = column_ids.loc[final_filtered.index].values  
+    refractive_only['IDS'] = column_ids.loc[refractive_only.index].values
+    return final_filtered, excluded_empty, excluded_sum, excluded_plus, excluded_nan, refractive_only, dataframe_compounds_without_properties
+
+# Applying all filters to the original DataFrame
+final_filtered, excluded_by_removeemptycolumns, excluded_by_sumlines, excluded_by_filterbynotplus, excluded_by_removerowswithna, compounds_and_refractive_only_df, dataframe_compounds_without_properties = apply_all_filters(dataframe_original)
+
+# Saving the results to CSV files
+filtered_path = Path("data/filtered")
+final_filtered.to_csv(filtered_path / 'final_df_dated.csv', index=False)
+#excluded_by_removeemptycolumns.to_csv(filtered_path / 'excluded_by_removeemptycolumns.csv', index=False)
+#excluded_by_sumlines.to_csv(filtered_path / 'excluded_by_sumlines.csv', index=False)
+#excluded_by_filterbynotplus.to_csv(filtered_path / 'excluded_by_filterbynotplus.csv', index=False)
+#excluded_by_removerowswithna.to_csv(filtered_path / 'excluded_by_removerowswithna.csv', index=False)
+compounds_and_refractive_only_df.to_csv(filtered_path / 'compounds_and_refractive_only_df_dated.csv', index=False)
+#dataframe_compounds_without_properties.to_csv(filtered_path / 'dataframe_compounds_without_properties.csv', index=False)
+
+# Displaying processing summary
+print("\nProcessing Summary:")
+print(f"{'Original DataFrame size:':<50} {dataframe_original.shape}")
+print(f"{'Final filtered DataFrame size:':<50} {final_filtered.shape}")
+print(f"{'Excluded (empty columns):':<50} {excluded_by_removeemptycolumns.shape}")
+print(f"{'Excluded (row sums):':<50} {excluded_by_sumlines.shape}")
+print(f"{'Excluded (columns containing +):':<50} {excluded_by_filterbynotplus.shape}")
+print(f"{'Excluded (rows with NaN):':<50} {excluded_by_removerowswithna.shape}")
+print(f"{'DataFrame with compounds and refractive indices:':<50} {compounds_and_refractive_only_df.shape}")
+print(f"{'DataFrame with compounds without properties:':<50} {dataframe_compounds_without_properties.shape}")
