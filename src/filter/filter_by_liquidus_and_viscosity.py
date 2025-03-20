@@ -240,9 +240,9 @@ selected_columns = [col for col in desired_compounds + liquidus_cols + viscosity
 compounds_liquidus_and_viscosity_df = filtered_df[selected_columns]
 
 # Print the shape of the compounds_liquidus_and_viscosity_df
-print(f"Shape of compounds_liquidus_and_viscosity_df DataFrame: {compounds_liquidus_and_viscosity_df.shape}")
+print(f"Shape of compounds_liquidus_and_viscosity DataFrame: {compounds_liquidus_and_viscosity_df.shape}")
 
 # 8. Save the resulting DataFrame
-compounds_liquidus_and_viscosity_df.to_csv("data/filtered/compounds_liquidus_and_viscosity_df.csv", index=False)
+compounds_liquidus_and_viscosity_df.to_csv("data/filtered/compounds_liquidus_and_viscosity.csv", index=False)
 
-print("compounds_liquidus_and_viscosity_df created successfully!")
+print("compounds_liquidus_and_viscosity created successfully!")

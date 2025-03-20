@@ -131,8 +131,8 @@ if __name__ == "__main__":
     
     # 4. Save the resulting DataFrames as CSV files
   #  final_df_atualizado.to_csv(filtered_path / "final_df_atualizado.csv", index=False)
-    compounds_and_refractive_only.to_csv(filtered_path / "compounds_and_refractive_only_df.csv", index=False)
+    compounds_and_refractive_only.to_csv(filtered_path / "compounds_and_refractive.csv", index=False)
     
     # Print messages indicating the successful generation of files
-    print("Geração de 'compounds_and_refractive_only_df.csv' concluída com sucesso.")
+    print("Geração de 'compounds_and_refractive.csv' concluída com sucesso.")
     print(f"Tamanho: {compounds_and_refractive_only.shape}")
