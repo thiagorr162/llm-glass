@@ -1,3 +1,5 @@
+#Esta versão é mais simples do que a versão final, mas ficará aqui para critério de ajustes, pois ela não lida com a classificaçã
+
 import json
 import pathlib
 import re
