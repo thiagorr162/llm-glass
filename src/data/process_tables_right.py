@@ -6,12 +6,12 @@ import shutil
 import pandas as pd
 import csv
 
-# Function to normalize strings: removes spaces, accents, and converts to lowercase
+# Função para normalizar strings: remove espaços, acentos e converte para letras minúsculas
 def normalize_string(s):
     return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s)
                   .encode("ASCII", "ignore").decode("utf-8").lower())
 
-# Function to check if a value is numeric
+# Função para verificar se um valor é numérico
 def is_numeric(val):
     try:
         float(val)
@@ -19,61 +19,62 @@ def is_numeric(val):
     except ValueError:
         return False
 
-# Function to copy unprocessed files to a destination folder
+# Função para copiar arquivos não processados para a pasta de destino
 def copy_to_not_processed(src_path, dest_folder):
     destination = dest_folder / src_path.name
     counter = 1
 
-    # Adds a numeric suffix if the file already exists to avoid overwriting
+    # Adiciona um sufixo numérico se o arquivo já existir para evitar sobrescrita
     while destination.exists():
         destination = dest_folder / f"{src_path.stem}_{counter}{src_path.suffix}"
         counter += 1
 
     try:
         shutil.copy(src_path, destination)
-        print(f"File copied to: {destination}")
+        print(f"Arquivo copiado para: {destination}")
     except Exception as e:
-        print(f"Failed to copy {src_path} to 'not_processed': {e}")
+        print(f"Falha ao copiar {src_path} para 'not_processed': {e}")
 
-# Configuration of paths
+# Configuração dos caminhos
 input_path = pathlib.Path("data/patents")
 properties_file = pathlib.Path("json/properties.json")
 not_processed_path = input_path / "not_processed"
 not_processed_path.mkdir(parents=True, exist_ok=True)
 
-# Load desired compounds from the JSON file and normalize the names
+# Carrega os compostos desejados do arquivo JSON e normaliza os nomes
 with properties_file.open(encoding="utf-8") as f:
     properties_data = json.load(f)
     desired_compounds = [normalize_string(compound) 
                          for compound in properties_data.get("desired_compounds", [])]
 
-# Iterate through all CSV files in the specified structure
-for table_file in input_path.rglob("*/processed/splitted/*.csv"):
+# Itera por todos os arquivos CSV na estrutura especificada
+for table_file in input_path.rglob("*.csv"):
+    print(f"Processando arquivo: {table_file}")
     try:
-        # Read the CSV file into lines
+        # Lê o arquivo CSV em linhas
         with open(table_file, 'r', encoding='utf-8') as file:
             reader = csv.reader(file)
             rows = list(reader)
 
-        # Determine the maximum number of columns
+        # Determina o número máximo de colunas
         max_columns = max(len(row) for row in rows)
 
-        # List to store information about each row
+        # Lista para armazenar informações sobre cada linha
         rows_info = []
         max_first_numeric_idx = 0
 
-        # Analyze each row to identify the position of the first numeric value
+        # Analisa cada linha para identificar a posição do primeiro valor numérico
         for row in rows:
             first_numeric_idx = None
             for idx, val in enumerate(row):
                 val_strip = val.strip()
                 if val_strip in ['', '-', ' ']:
-                    continue  # NaN value
+                    continue  # Valor NaN
                 elif is_numeric(val_strip):
                     first_numeric_idx = idx
-                    break  # First numeric value found
+                    break  # Primeiro valor numérico encontrado
             if first_numeric_idx is None:
-                first_numeric_idx = len(row)  # No numeric value found
+                first_numeric_idx = len(row)  # Nenhum valor numérico encontrado
             if first_numeric_idx > max_first_numeric_idx:
                 max_first_numeric_idx = first_numeric_idx
             rows_info.append({
@@ -81,29 +82,29 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
                 'first_numeric_idx': first_numeric_idx
             })
 
-        # Adjust each row based on the maximum index of the first numeric value
+        # Ajusta cada linha com base no índice máximo do primeiro valor numérico
         adjusted_rows = []
         for info in rows_info:
             row = info['row']
             first_numeric_idx = info['first_numeric_idx']
             shift = max_first_numeric_idx - first_numeric_idx
             if shift > 0:
-                # Insert NaNs to align numeric values
+                # Insere NaNs para alinhar os valores numéricos
                 row = row + ['-'] * shift
-            # Fill with NaNs to the right to ensure the same number of columns
+            # Preenche com NaNs à direita para garantir o mesmo número de colunas
             row += ['-'] * (max_columns - len(row))
             adjusted_rows.append(row)
 
-        # Rewrite the CSV file with the adjusted rows
+        # Reescreve o arquivo CSV com as linhas ajustadas
         with open(table_file, 'w', encoding='utf-8', newline='') as file:
             writer = csv.writer(file)
             writer.writerows(adjusted_rows)
 
-        # Load the CSV file into a pandas DataFrame
+        # Carrega o arquivo CSV em um DataFrame do pandas
         df = pd.read_csv(table_file, encoding='utf-8', delimiter=',', header=None)
-        df = df.dropna(axis=1, how="all").T  # Remove completely empty columns and transpose
+        df = df.dropna(axis=1, how="all").T  # Remove colunas completamente vazias e transpõe
 
-        # Find the header index containing the desired compounds
+        # Encontra o índice do cabeçalho contendo os compostos desejados
         header_idx = next(
             (idx for idx, row in enumerate(df.values)
              if any(normalize_string(str(h)) in desired_compounds for h in row)),
@@ -111,27 +112,32 @@ for table_file in input_path.rglob("*/processed/splitted/*.csv"):
         )
 
         if header_idx is not None:
-            # Create a new DataFrame using the found header
+            # Cria um novo DataFrame usando o cabeçalho encontrado
             new_header = df.iloc[header_idx]
             new_df = df[header_idx + 1:].copy()
             new_df.columns = new_header
 
-            # Add a column with the current file path
+            # Adiciona uma coluna com o caminho do arquivo atual
             new_df['IDS'] = str(table_file)
 
-            # Define the output path to save the processed DataFrame
-            output_path = table_file.parents[1] / "dataframe"
+            # Define o caminho de saída para salvar o DataFrame processado:
+            # Se o arquivo estiver em uma pasta "splitted", salva em "processed/dataframe".
+            # Caso contrário, salva diretamente em "data/patents/".
+            if "splitted" in table_file.parts:
+                output_path = table_file.parents[1] / "dataframe"
+            else:
+                output_path = input_path
             output_path.mkdir(parents=True, exist_ok=True)
-            new_df.to_csv(output_path / (table_file.stem + ".csv"), index=False)
+            output_file = output_path / (table_file.stem + ".csv")
+            new_df.to_csv(output_file, index=False)
+            print(f"Tabela processada e salva em: {output_file}")
         else:
-            # Move the file to 'not_processed' if no desired compound is found in the header
-            print(f"WARNING: No desired compound found in the header: {table_file}")
+            print(f"AVISO: Nenhum composto desejado encontrado no cabeçalho: {table_file}")
             copy_to_not_processed(table_file, not_processed_path)
 
     except Exception as e:
-        # General error handling
-        print(f"ERROR: {e} in {table_file}")
+        print(f"ERRO: {e} em {table_file}")
         copy_to_not_processed(table_file, not_processed_path)
 
-# Final message indicating that processing is complete
-print("Operation completed successfully.")
+# Mensagem final indicando que o processamento foi concluído
+print("Operação concluída com êxito.")
