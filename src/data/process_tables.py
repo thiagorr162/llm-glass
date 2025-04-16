@@ -59,7 +59,7 @@ for table_file in input_path.rglob("processed/splitted/*.csv"):
         rows_info = []
         max_left_gap = 0  # Armazena o maior número de NaNs anteriores ao primeiro numérico encontrado
 
-        for row in rows:
+        for row in rows[1:]:
             shift_left_count = 0
             first_numeric_idx = None
             # Itera sobre a linha para encontrar o primeiro valor numérico

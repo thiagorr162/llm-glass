@@ -4,6 +4,7 @@ import unicodedata
 import pandas as pd
 import csv
 
+# ignora esse codigo, só estou usando pra testar o process 
 # Função para normalizar strings: remove espaços, acentos e converte para letras minúsculas
 def normalize_string(s):
     return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s)
