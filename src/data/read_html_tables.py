@@ -37,6 +37,11 @@ except (FileNotFoundError, json.JSONDecodeError) as e:
 # Path to the JSON folder
 json_folder = Path("data/patents")
 
+# Counters
+good_tables_count = 0
+bad_tables_count = 0
+unsaved_tables_count = 0
+
 # Iterate over all JSON files
 for json_file in json_folder.rglob("*.json"):
     try:
@@ -73,6 +78,11 @@ for json_file in json_folder.rglob("*.json"):
             for cell in row
         )
 
+        if contains_desired:
+            good_tables_count += 1
+        else:
+            bad_tables_count += 1
+
         # Create output folders
         output_folder = json_file.parent / "tables" / ("good_tables" if contains_desired else "bad_tables")
         output_folder.mkdir(parents=True, exist_ok=True)
@@ -87,7 +97,12 @@ for json_file in json_folder.rglob("*.json"):
                 writer.writerows(table_data)
             print(f"Table saved to {output_file}")
         except IOError as e:
+            unsaved_tables_count += 1
             print(f"Error saving file {output_file.name}: {e}")
 
+# Final report
+print("\nSummary:")
+print(f"Good tables saved: {good_tables_count}")
+print(f"Bad tables saved: {bad_tables_count}")
+print(f"Tables failed to save: {unsaved_tables_count}")
 print("Operation completed successfully.")
-

@@ -23,14 +23,14 @@ molar_regex = re.compile(r'(?i)mol')
 # List of mass-based keywords
 massic_keywords = [
     "wt %",
-    "mass %",
-    "mass percentage",
-    "weight %",
-    "weight percentage",
-    "wt%",
-    "wt-%",
+    "mass %", 
+    "mass percentage", 
+    "weight %", 
+    "weight percentage", 
+    "wt%", 
+    "wt-%", 
     "wt.%", 
-    "mass %",
+    "mass %", 
     "mass%"
 ]
 
@@ -62,7 +62,7 @@ def basis_type(table_text):
         print(found_molar_matches)
         return "both"
     else:
-     return "none"
+        return "none"
 
 def check_if_desired(text):
     """
@@ -95,13 +95,16 @@ with properties_file.open(encoding="utf-8") as f:
     properties_data = json.load(f)
     desired_compounds = [normalize_string(c) for c in properties_data.get("desired_compounds", [])]
 
+# Initialize counter for split tables
+splitted_tables_count = 0
+
 # Iterate over all CSV files in good_tables directories
 for table_file in input_path.rglob("good_tables/*.csv"):
     try:
         # Define output path for split tables
         output_path = table_file.parents[2] / "processed/splitted"
         output_path.mkdir(parents=True, exist_ok=True)
-       
+
         # Read the table content
         with table_file.open("r", encoding="utf-8") as f:
             txt_table = f.read()
@@ -139,6 +142,7 @@ for table_file in input_path.rglob("good_tables/*.csv"):
                 # Save the filtered snippet
                 with output_file.open("w", encoding="utf-8") as file:
                     file.write(filtered_lines)
+                splitted_tables_count += 1  # Increment split count
 
                 # Append classification entry to CSV using the new splitted file name as ID
                 with classification_csv.open("a", encoding="utf-8", newline="") as cf:
@@ -187,5 +191,7 @@ if classification_csv.exists():
     for key, count in counts.items():
         percentage = (count / total * 100) if total > 0 else 0
         print(f"{key}: {count} ({percentage:.2f}%)")
+
+    print(f"\nTotal splitted tables generated: {splitted_tables_count}")
 else:
     print("\nNo classification file generated (no desired compounds found).")
