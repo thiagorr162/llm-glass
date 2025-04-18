@@ -113,8 +113,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
     print(f"Unique compositions in {csv1_path.name}: {len(unique1)}")
     print(f"Unique compositions in {csv2_path.name}: {len(unique2)}")
     print(f"File '{out_path.name}' generated successfully.")
-
-    # Additional similarity check among unique rows
+    
     # Compare each unique row in csv1 against all unique rows in csv2,
     # counting how many share at least N identical non-zero numeric values.
     thresholds = [8, 9, 10]
