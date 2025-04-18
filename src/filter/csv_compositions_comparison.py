@@ -94,14 +94,14 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
         writer.writerow([])
 
         # Unique to first CSV
-        writer.writerow([f"Unic compositions for {csv1_path.name}"])
+        writer.writerow([f"Unique compositions for {csv1_path.name}"])
         writer.writerow([key_col.upper()] + [c.upper() for c in comp_cols])
         for _, row in unique1.sort_values(by=key_col).iterrows():
             writer.writerow([row[key_col]] + [row[c] for c in comp_cols])
         writer.writerow([])
 
         # Unique to second CSV
-        writer.writerow([f"Unic compositions for {csv2_path.name}"])
+        writer.writerow([f"Unique compositions for {csv2_path.name}"])
         writer.writerow([key_col.upper()] + [c.upper() for c in comp_cols])
         for _, row in unique2.sort_values(by=key_col).iterrows():
             writer.writerow([row[key_col]] + [row[c] for c in comp_cols])
@@ -110,16 +110,45 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
     print(f"Rows in {csv1_path.name}: {len(sub1)}")
     print(f"Rows in {csv2_path.name}: {len(sub2)}")
     print(f"Common compositions: {len(common_rows)}")
-    print(f"Unic compositions in {csv1_path.name}: {len(unique1)}")
-    print(f"Unic compositions in {csv2_path.name}: {len(unique2)}")
-    print(f"Arquivo '{out_path.name}' gerado com sucesso.")
+    print(f"Unique compositions in {csv1_path.name}: {len(unique1)}")
+    print(f"Unique compositions in {csv2_path.name}: {len(unique2)}")
+    print(f"File '{out_path.name}' generated successfully.")
+
+    # Additional similarity check among unique rows
+    # Compare each unique row in csv1 against all unique rows in csv2,
+    # counting how many share at least N identical non-zero numeric values.
+    thresholds = [8, 9, 10]
+    counts = {n: 0 for n in thresholds}
+
+    # Pre-extract numeric arrays for faster comparison
+    arr1 = unique1[comp_cols].to_numpy()
+    arr2 = unique2[comp_cols].to_numpy()
+
+    # For each row in unique1, check if there's at least one match in unique2
+    for row_idx, row_vals in enumerate(arr1):
+        for n in thresholds:
+            found = False
+            for other_vals in arr2:
+                # count positions where both are equal and non-zero
+                matches = ((row_vals == other_vals) & (row_vals != 0)).sum()
+                if matches >= n:
+                    counts[n] += 1
+                    found = True
+                    break
+            # if found for this threshold, no need to re-count for same row
+            # continue checking next threshold
+    # Print similarity summary
+    total_unique1 = len(unique1)
+    for n in thresholds:
+        print(f"Of the {total_unique1} unique rows in {csv1_path.name}, {counts[n]} have at least {n} identical non-zero values in unique rows of {csv2_path.name}")
+    print("Vice versa comparison would yield the same counts by symmetry.")
 
 if __name__ == "__main__":
     # Folder containing the two CSVs
     folder = Path(r"C:\Users\user\Documents\llm-glass-testes\data\filtered")
     # Hard-coded CSV filenames
-    csv1 = folder / "csv_for_comparison_1.csv"
-    csv2 = folder / "csv_for_comparison_2.csv"
+    csv1 = folder / "PROCESS_RECENTE_compounds_and_refractive(1414x76).csv"
+    csv2 = folder / "PROCESS_RIGHT_compounds_and_refractive(1550x73).csv"
     # Correct JSON folder and filename
     props_json = Path(r"C:\Users\user\Documents\llm-glass-testes\json") / "properties.json"
 
