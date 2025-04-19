@@ -6,7 +6,6 @@ import shutil
 from pathlib import Path
 import pandas as pd
 
-# ------------------ helpers ------------------ #
 def normalize_string(s: str) -> str:
     """
     Normalize a string by:
@@ -32,7 +31,6 @@ def make_signature(row: pd.Series, cols: list[str]) -> tuple:
     """Return a tuple with the values of *cols* in *row* (full‑row signature)."""
     return tuple(row[col] for col in cols)
 
-# --------------- main routine ---------------- #
 def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
     desired = load_desired_compounds(props_json)
 
@@ -91,7 +89,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
     print(f"Unique compositions in {csv2_path.name}: {len(unique2)}")
     print(f"File '{out_path.name}' generated successfully.")
 
-    # ---------- similarity check ‘at least N’ (OLD logic re‑instated) ---------- #
+    #Check ‘at least N’ #
     thresholds = [3, 4, 5]             # ← ao menos 3, 4, 5 valores iguais
     counts         = {n: 0 for n in thresholds}
     matching_pairs = {n: [] for n in thresholds}
@@ -100,9 +98,8 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
     arr2 = unique2[comp_cols].to_numpy()
 
     # For every row in unique1, test each threshold independently,
-    # searching *até encontrar* o PRIMEIRO par que satisfaça ≥N;
-    # depois avança para o próximo threshold da mesma linha,
-    # exatamente como na versão “antiga”.
+    # searching until find the first pair that satisfies ≥N;
+    # then go to the nex threshold in the same row
     for i, row_vals in enumerate(arr1):
         for n in thresholds:
             for j, other_vals in enumerate(arr2):
@@ -120,7 +117,6 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
               f"in unique rows of {csv2_path.name}")
     print("Vice versa comparison would yield the same counts by symmetry.")
 
-    # ---------- build row_analysis folder & artefacts ---------- #
     analysis_dir = csv1_path.parent / "row_analysis"
     if analysis_dir.exists():
         shutil.rmtree(analysis_dir)
@@ -139,7 +135,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
 
     pd.DataFrame(pe_rows).to_csv(analysis_dir / "possible_equal_rows.csv", index=False)
 
-    # copy table files referenced by IDS (best‑effort)
+    #Copy table files referenced by IDS 
     project_root = csv1_path.parent.parent.parent   # llm‑glass‑testes
     for id_val in set(r[key_col.upper()] for r in pe_rows):
         src = project_root / id_val
@@ -150,7 +146,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
 
     print(f"Row analysis artifacts written to '{analysis_dir}'")
 
-# ------------------ runner ------------------ #
+#Runner
 if __name__ == "__main__":
     folder     = Path(r"C:\Users\user\Documents\llm-glass-testes\data\filtered")
     csv1       = folder / "PROCESS_RECENTE_compounds_and_refractive(1414x76).csv"
