@@ -2,6 +2,7 @@ import json
 import re
 import unicodedata
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -169,11 +170,28 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path):
 
 # ------------------ runner ------------------ #
 
-if __name__ == '__main__':
+if __name__ == "__main__":
+    # Define root and filtered-data paths
     root = Path(__file__).resolve().parents[2]
     base = root / "data" / "filtered"
+    
+    # Locate the LEFT and RIGHT compounds_and_refractive CSV files
+    left_files = list(base.glob("LEFT_compounds_and_refractive*.csv"))
+    right_files = list(base.glob("RIGHT_compounds_and_refractive*.csv"))
+    if not left_files or not right_files:
+        print("ERROR: Could not find LEFT or RIGHT compounds_and_refractive files.")
+        exit(1)
+    left_csv  = left_files[0]
+    right_csv = right_files[0]
+    
+    # Define properties JSON path
+    properties_file = root / "json" / "properties.json"
+    
+    # Compare compositions
     compare_compositions(
-        base / "PROCESS_LEFT_compounds_and_refractive(1414x76).csv",
-        base / "PROCESS_RIGHT_compounds_and_refractive(1550x73).csv",
-        root / "json" / "properties.json"
+        left_csv,
+        right_csv,
+        properties_file
     )
+
+
