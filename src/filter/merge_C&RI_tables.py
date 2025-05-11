@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 # --------------------------------------------------------------------------- #
-# Helper utilities
+# 1. Helper utilities
 # --------------------------------------------------------------------------- #
 
 def normalize_string(s: str) -> str:
@@ -70,7 +70,7 @@ def select_one_closest_to_100(a: np.ndarray, b: np.ndarray) -> int:
     return 1 if d1 < d2 else (2 if d2 < d1 else 0)
 
 # --------------------------------------------------------------------------- #
-# Core routine
+# 2. Core routine
 # --------------------------------------------------------------------------- #
 
 def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> None:
@@ -118,7 +118,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
     arr1, arr2 = unique1[comp_cols].to_numpy(), unique2[comp_cols].to_numpy()
 
     used_i: set[int] = set()          # rows of unique1 that already formed a pair
-    used_j: set[int] = set()          # rows of unique2 that already formed a pair ✅
+    used_j: set[int] = set()          # rows of unique2 that already formed a pair 
 
     winners1, losers1 = set(), set()
     winners2, losers2 = set(), set()
@@ -240,12 +240,27 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
     u1_rows = [r for r in unique1['_row_num'] if r not in winners1 and r not in losers1]
     u2_rows = [r for r in unique2['_row_num'] if r not in winners2 and r not in losers2]
 
+   # Construct each block and respective origin (_src)
     block_common = fetch_rows(1, common_rows)
-    block_u1     = fetch_rows(1, u1_rows)
-    block_u2     = fetch_rows(2, u2_rows)
-    block_dyn    = pd.concat([fetch_rows(1, sorted(winners1)),
-                              fetch_rows(2, sorted(winners2))],
-                             ignore_index=True)
+    block_common['Origin'] = 'common'
+
+    block_u1 = fetch_rows(1, u1_rows)
+    block_u1['Origin'] = 'u1'
+
+    block_u2 = fetch_rows(2, u2_rows)
+    block_u2['Origin'] = 'u2'
+
+   # Winners 1 and 2 remount, so _search exists
+    blk1 = fetch_rows(1, sorted(winners1))
+    blk1['_src'] = 1
+    blk2 = fetch_rows(2, sorted(winners2))
+    blk2['_src'] = 2
+    block_dyn = pd.concat([blk1, blk2], ignore_index=True)
+   # Map src=1 → dyn1, src=2 → dyn2
+    block_dyn['Origin'] = block_dyn['_src'].map({1: 'dyn1', 2: 'dyn2'})
+
+   #Count dyn 1 and dyn2
+    counts = block_dyn['Origin'].value_counts()
 
     final_df = pd.concat([block_common, block_u1, block_u2, block_dyn],
                          ignore_index=True)
@@ -253,7 +268,8 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
         'common': len(block_common),
         'u1':     len(block_u1),
         'u2':     len(block_u2),
-        'dyn':    len(block_dyn),
+        'dyn1':   counts.get('dyn1',0),
+        'dyn2':   counts.get('dyn2',0),
         'total':  len(final_df)
     })
 
@@ -281,7 +297,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
     print("Wrote final filtered CSV →", out_path)
 
 # --------------------------------------------------------------------------- #
-# CLI / runner
+# 3. CLI / runner
 # --------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
