@@ -8,21 +8,7 @@ import csv
 from pathlib import Path
 
 # ------------------------------------------------------------------------------
-# 1. Path Configuration and Initialization
-# ------------------------------------------------------------------------------
-a_input_path = pathlib.Path("data/patents")   # Base directory for patent tables
-properties_file = pathlib.Path("json/properties.json")  # JSON file listing target compounds
-not_processed_path = a_input_path / "not_processed"  # Directory for unprocessed files
-not_processed_path.mkdir(parents=True, exist_ok=True)  # Ensure existence
-
-# Load and normalize desired compound names from JSON
-with properties_file.open(encoding="utf-8") as f:
-    properties_data = json.load(f)
-    desired_compounds = set(
-        normalize_string(comp) for comp in properties_data.get("desired_compounds", [])
-    )
-# ------------------------------------------------------------------------------
-# 2. Utility Functions
+# 1. Utility Functions
 # ------------------------------------------------------------------------------
 
 def normalize_string(s):
@@ -72,6 +58,20 @@ def copy_to_not_processed(src_path: Path, dest_folder: Path):
     except Exception as e:
         print(f"Falha ao copiar {src_path} para 'not_processed': {e}")
 
+# ------------------------------------------------------------------------------
+# 2 Path and configuration and Initialization
+# ------------------------------------------------------------------------------
+a_input_path = pathlib.Path("data/patents")   # Base directory for patent tables
+properties_file = pathlib.Path("json/properties.json")  # JSON file listing target compounds
+not_processed_path = a_input_path / "not_processed"  # Directory for unprocessed files
+not_processed_path.mkdir(parents=True, exist_ok=True)  # Ensure existence
+
+# Load and normalize desired compound names from JSON
+with properties_file.open(encoding="utf-8") as f:
+    properties_data = json.load(f)
+    desired_compounds = set(
+        normalize_string(comp) for comp in properties_data.get("desired_compounds", [])
+    )
 
 # ------------------------------------------------------------------------------
 # 3. RIGHT-Edge Table Processing Logic
