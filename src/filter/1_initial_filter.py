@@ -63,6 +63,8 @@ def filter_rows_by_sum(dataframe: pd.DataFrame, tolerance=1):
     #normalize rows to 100
     row_sums= combined_rows.sum(axis=1)
     combined_rows = combined_rows.div(row_sums, axis=0) * 100
+    combined_rows = combined_rows.round(2)
+
     return combined_rows, excluded_rows
 
 def filter_columns_by_properties(dataframe: pd.DataFrame, properties: list):

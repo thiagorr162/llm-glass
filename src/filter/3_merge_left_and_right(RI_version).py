@@ -301,9 +301,13 @@ total  ({len(final_df):>3}):    Total number of rows in the final dataset
                  if c not in norm_oxides and c != 'ids']
     properties_only = final_df[prop_cols]
 
+    final_df = final_df.drop(columns=['Origin'])
+
     final_df = final_df.rename(columns={'ids': 'IDS'})
     post_processed = pd.concat([compounds_only, properties_only], axis=1)
     post_processed['IDS'] = final_df['IDS']
+
+    final_df = final_df.drop(columns=['_src'])
 
     # 10. Export ----------------------------------------------------------- #
     out_path = csv1_path.parent / "FINAL_compounds_and_refractive.csv"
