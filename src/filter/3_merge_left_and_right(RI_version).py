@@ -176,53 +176,55 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
     dyn_df = pd.DataFrame(dyn_records).reset_index(drop=True)
 
          # ——— DEBUG for rows_sum criteria ———
-    analysis_dir = csv1_path.parent / "analysis"
-    analysis_dir.mkdir(exist_ok=True)
-
-    def build_debug_row(rec, role, pair_id, src_label):
-        """
-        Make the dict with:
-          – PAIR_ID : Winner's IDS
-          – ROLE    : 'WIN' ou 'LOSE'
-          – SRC     : 1 (LEFT) ou 2 (RIGHT)
-          – IDS, SUM, DIFF_SUM, values for each Desired Compound
-        """
-        return {
-            "PAIR_ID":  pair_id,
-            "ROLE":     role,
-            "SRC":      src_label,
-            "IDS":      rec["ids"],
-            "SUM":      float(rec[comp_cols].sum()),
-            "DIFF_SUM": abs(rec[comp_cols].sum() - 100.0),
-            **{c.upper(): rec[c] for c in comp_cols}
-        }
-
-    pair_rows = []                                       
-
-    for win_idx, lose_idx, src_w in pair_tuples:
-        win_df  = unique1 if src_w == 1 else unique2
-        lose_df = unique2 if src_w == 1 else unique1
-
-        w = win_df .loc[win_df ['_row_num'] == win_idx ].iloc[0]
-        l = lose_df.loc[lose_df['_row_num'] == lose_idx].iloc[0]
-
-        diff_cols = [c.upper() for c in comp_cols
-                     if w[c] != l[c] ]
-
-        # Winner row
-        pair_rows.append({
-            **build_debug_row(w, "WIN",  win_idx, src_w),
-            "DIFF_COLS": ";".join(diff_cols)
-        })
-        # Loser row
-        pair_rows.append({
-            **build_debug_row(l, "LOSE", win_idx, 3 - src_w),   # 3-src 1↔2
-            "DIFF_COLS": ";".join(diff_cols)
-        })
-
-    debug_pairs = pd.DataFrame(pair_rows)
-    debug_pairs.to_csv(analysis_dir / "dynamic_pairs_full.csv", index=False)
-    print("Wrote dynamic-pairs debug CSV →", analysis_dir / "dynamic_pairs_full.csv")
+    
+    # A SEÇÃO ABAIXO ESTÁ APENAS COMENTADA POR NÃO PRECISAR DA ANÁLISE NO MOMENTO
+    #analysis_dir = csv1_path.parent / "analysis"
+    #analysis_dir.mkdir(exist_ok=True)
+#
+    #def build_debug_row(rec, role, pair_id, src_label):
+    #    """
+    #    Make the dict with:
+    #      – PAIR_ID : Winner's IDS
+    #      – ROLE    : 'WIN' ou 'LOSE'
+    #      – SRC     : 1 (LEFT) ou 2 (RIGHT)
+    #      – IDS, SUM, DIFF_SUM, values for each Desired Compound
+    #    """
+    #    return {
+    #        "PAIR_ID":  pair_id,
+    #        "ROLE":     role,
+    #        "SRC":      src_label,
+    #        "IDS":      rec["ids"],
+    #        "SUM":      float(rec[comp_cols].sum()),
+    #        "DIFF_SUM": abs(rec[comp_cols].sum() - 100.0),
+    #        **{c.upper(): rec[c] for c in comp_cols}
+    #    }
+#
+    #pair_rows = []                                       
+#
+    #for win_idx, lose_idx, src_w in pair_tuples:
+    #    win_df  = unique1 if src_w == 1 else unique2
+    #    lose_df = unique2 if src_w == 1 else unique1
+#
+    #    w = win_df .loc[win_df ['_row_num'] == win_idx ].iloc[0]
+    #    l = lose_df.loc[lose_df['_row_num'] == lose_idx].iloc[0]
+#
+    #    diff_cols = [c.upper() for c in comp_cols
+    #                 if w[c] != l[c] ]
+#
+    #    # Winner row
+    #    pair_rows.append({
+    #        **build_debug_row(w, "WIN",  win_idx, src_w),
+    #        "DIFF_COLS": ";".join(diff_cols)
+    #    })
+    #    # Loser row
+    #    pair_rows.append({
+    #        **build_debug_row(l, "LOSE", win_idx, 3 - src_w),   # 3-src 1↔2
+    #        "DIFF_COLS": ";".join(diff_cols)
+    #    })
+#
+    #debug_pairs = pd.DataFrame(pair_rows)
+    #debug_pairs.to_csv(analysis_dir / "dynamic_pairs_full.csv", index=False)
+    #print("Wrote dynamic-pairs debug CSV →", analysis_dir / "dynamic_pairs_full.csv")
 
 
     # 8. Assemble final DataFrame ------------------------------------------ #
@@ -262,17 +264,29 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
    #Count dyn 1 and dyn2
     counts = block_dyn['Origin'].value_counts()
 
-    final_df = pd.concat([block_common, block_u1, block_u2, block_dyn],
-                         ignore_index=True)
-    print("Final block sizes:", {
-        'common': len(block_common),
-        'u1':     len(block_u1),
-        'u2':     len(block_u2),
-        'dyn1':   counts.get('dyn1',0),
-        'dyn2':   counts.get('dyn2',0),
-        'total':  len(final_df)
-    })
+    final_df = pd.concat([
+    block_common,
+    block_u2,
+    block_dyn[block_dyn['Origin'] == 'dyn2']
+], ignore_index=True)
 
+    print(f"""
+Common ({len(block_common):>3}):    Rows shared between both LEFT and RIGHT sources
+
+u1     ({len(block_u1):>3}):    Unique rows from LEFT-side processing
+
+u2     ({len(block_u2):>3}):    Unique rows from RIGHT-side processing
+
+Dyn:                Rows likely different due to processing differences (originally the same)
+
+dyn1   ({counts.get('dyn1', 0):>3}):    Rows where LEFT version is more reliable
+
+dyn2   ({counts.get('dyn2', 0):>3}):    Rows where RIGHT version is more reliable
+
+total  ({len(final_df):>3}):    Total number of rows in the final dataset
+""")
+
+    
     # 9. Restore oxide order, append extra properties, rename IDS ---------- #
     with props_json.open(encoding='utf-8') as jf:
         oxide_order = json.load(jf)["desired_compounds"]  # uppercase order
@@ -292,7 +306,7 @@ def compare_compositions(csv1_path: Path, csv2_path: Path, props_json: Path) -> 
     post_processed['IDS'] = final_df['IDS']
 
     # 10. Export ----------------------------------------------------------- #
-    out_path = csv1_path.parent / "compounds_and_refractive_post_processed.csv"
+    out_path = csv1_path.parent / "FINAL_compounds_and_refractive.csv"
     post_processed.to_csv(out_path, index=False)
     print("Wrote final filtered CSV →", out_path)
 
