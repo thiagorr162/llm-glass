@@ -70,6 +70,10 @@ def merge_refractive_index_columns(dataframe, desired_compounds):
  8. Optionally, removes rows with no RI data (merged RI column equals 0).
     """
     
+    # store "type" column it and drop it before any processing
+    type_series = dataframe["Type"].copy()
+    dataframe = dataframe.drop(columns=["Type"])
+
     # Make a copy of the original dataframe for safe processing
     original_df = dataframe.copy()
     
@@ -99,6 +103,9 @@ def merge_refractive_index_columns(dataframe, desired_compounds):
         summed_refractive.rename("Summarized Refractive Index")
     ], axis=1)
 
+    # Reattach "Type" column 
+    merged_df["Type"] = type_series
+
     # Build a DataFrame that includes:
     #   - The compound columns,
     #   - The original RI columns,
@@ -111,7 +118,11 @@ def merge_refractive_index_columns(dataframe, desired_compounds):
     # Optionally, remove rows where the merged RI column is 0 (indicating no RI data available)
     refractive_only = refractive_only[refractive_only["Summarized Refractive Index"] != 0]
 
+    # Reattach "Type" column to refractive_only if it was originally present
+    refractive_only["Type"] = type_series.loc[refractive_only.index]
+
     return merged_df, refractive_only
+
 
 # -----------------------------------------------------------------------------
 # 4. Main Execution Block
