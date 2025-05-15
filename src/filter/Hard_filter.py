@@ -60,6 +60,9 @@ def filter_rows_by_sum(dataframe: pd.DataFrame, tolerance=1):
     rows_sum_1_scaled = dataframe.loc[mask_sum_1] * 100
     combined_rows = pd.concat([rows_sum_100, rows_sum_1_scaled])
     excluded_rows = dataframe.drop(combined_rows.index)
+    #normalize rows to 100
+    row_sums= combined_rows.sum(axis=1)
+    combined_rows = combined_rows.div(row_sums, axis=0) * 100
     return combined_rows, excluded_rows
 
 def filter_columns_by_properties(dataframe: pd.DataFrame, properties: list):
@@ -179,16 +182,32 @@ def apply_all_filters_until_final(dataframe: pd.DataFrame, data: dict) -> pd.Dat
 
 def apply_classification(df: pd.DataFrame, classification_csv_path: Path) -> pd.DataFrame:
     """
-    Adiciona ao DataFrame df a coluna 'Type' vinda do CSV de classificação.
-    Para IDs sem classificação, preenche 'none'.
+    Adiciona ao DataFrame df a coluna 'Type' vinda do CSV de classificação,
+    preenche IDs sem classificação com 'none', e reposiciona 'Type' logo
+    antes de 'IDS'.
     """
+    # 1) Lê o CSV de classificação
     cls = pd.read_csv(classification_csv_path, dtype={"IDS": str})
     cls = cls.rename(columns={"type": "Type"})
+
+    # 2) Faz o merge mantendo todas as linhas do df original
     merged = df.merge(
         cls[["IDS", "Type"]],
-        how="left", on="IDS"
+        how="left",
+        on="IDS"
     )
+
+    # 3) Preenche os IDs sem classificação
     merged["Type"] = merged["Type"].fillna("none")
+
+    # 4) Reposiciona 'Type' imediatamente antes de 'IDS'
+    cols = list(merged.columns)
+    if "Type" in cols and "IDS" in cols:
+        cols.remove("Type")
+        idx = cols.index("IDS")
+        cols.insert(idx, "Type")
+        merged = merged[cols]
+
     return merged
 
 # ------------------------------------------------------------------------------
