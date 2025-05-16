@@ -8,6 +8,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser(
     description="Patent search on Google Patents based on a list of patent urls.",
@@ -48,17 +49,15 @@ browser = webdriver.Firefox(service=driver_service)
 output_dir = Path("data/patents")
 output_dir.mkdir(parents=True, exist_ok=True)
 
+has_no_tables = []
 
-for url in all_urls:
+for url in tqdm(all_urls):
     file_name = url.replace("https://", "").replace(".", "_").replace("/", "_")
 
     output_path = output_dir / file_name
-    output_path.mkdir(parents=True, exist_ok=True)
-
     output_file = output_path / (file_name + ".json")
 
     if output_file.exists():
-        print(f"File {output_file} already exists. Skipping creation.")
         continue
 
     browser.get(url)
@@ -94,26 +93,31 @@ for url in all_urls:
             patent_table_html = table.get_attribute("outerHTML")
             soup = BeautifulSoup(patent_table_html, "html.parser").prettify()
             html_tables.append(soup)
+
+        patent_data = {
+            "url": url,
+            "title": title,
+            "type": patent_type,
+            "description": description,
+            "application_number": application_number,
+            "publication_number": publication_number,
+            "pdf_url": pdf_url,
+            "inventors": inventors,
+            "assignee": assignee,
+            "date": date,
+            "html_tables": html_tables,
+        }
+        output_path.mkdir(parents=True, exist_ok=True)
+
+        with output_file.open(mode="w", encoding="utf-8") as f:
+            json.dump(patent_data, f, ensure_ascii=False, indent=4)
+
     except TimeoutException:
-        print(f"No patent tables found on {url}.")
-        html_tables = []
+        has_no_tables.append(url)
 
-    patent_data = {
-        "url": url,
-        "title": title,
-        "type": patent_type,
-        "description": description,
-        "application_number": application_number,
-        "publication_number": publication_number,
-        "pdf_url": pdf_url,
-        "inventors": inventors,
-        "assignee": assignee,
-        "date": date,
-        "html_tables": html_tables,
-    }
+with open(output_dir / "has_no_tables.txt", "w") as output:
+    output.write(str(has_no_tables))
 
-    with output_file.open(mode="w", encoding="utf-8") as f:
-        json.dump(patent_data, f, ensure_ascii=False, indent=4)
 
 browser.quit()
 
