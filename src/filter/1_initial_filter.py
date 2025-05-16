@@ -43,7 +43,7 @@ def filter_by_compounds(dataframe: pd.DataFrame, desired_compounds: list):
     excluded_df = dataframe.loc[:, ~filtered_columns_mask]
     return filtered_df, excluded_df
 
-def filter_rows_by_sum(dataframe: pd.DataFrame, tolerance=2):
+def filter_rows_by_sum(dataframe: pd.DataFrame, tolerance=1):
     """
     Keeps only the rows where the sum of values is approximately 100
     or approximately 1 (assuming the data might be scaled, so a row with a sum near 1 is scaled up to 100).
@@ -60,6 +60,11 @@ def filter_rows_by_sum(dataframe: pd.DataFrame, tolerance=2):
     rows_sum_1_scaled = dataframe.loc[mask_sum_1] * 100
     combined_rows = pd.concat([rows_sum_100, rows_sum_1_scaled])
     excluded_rows = dataframe.drop(combined_rows.index)
+    #normalize rows to 100
+    row_sums= combined_rows.sum(axis=1)
+    combined_rows = combined_rows.div(row_sums, axis=0) * 100
+    combined_rows = combined_rows.round(2)
+
     return combined_rows, excluded_rows
 
 def filter_columns_by_properties(dataframe: pd.DataFrame, properties: list):
@@ -177,44 +182,71 @@ def apply_all_filters_until_final(dataframe: pd.DataFrame, data: dict) -> pd.Dat
     
     return final_filtered
 
+def apply_classification(df: pd.DataFrame, classification_csv_path: Path) -> pd.DataFrame:
+    """
+    Adiciona ao DataFrame df a coluna 'Type' vinda do CSV de classificação,
+    preenche IDs sem classificação com 'none', e reposiciona 'Type' logo
+    antes de 'IDS'.
+    """
+    # 1) Lê o CSV de classificação
+    cls = pd.read_csv(classification_csv_path, dtype={"IDS": str})
+    cls = cls.rename(columns={"type": "Type"})
+
+    # 2) Faz o merge mantendo todas as linhas do df original
+    merged = df.merge(
+        cls[["IDS", "Type"]],
+        how="left",
+        on="IDS"
+    )
+
+    # 3) Preenche os IDs sem classificação
+    merged["Type"] = merged["Type"].fillna("none")
+
+    # 4) Reposiciona 'Type' imediatamente antes de 'IDS'
+    cols = list(merged.columns)
+    if "Type" in cols and "IDS" in cols:
+        cols.remove("Type")
+        idx = cols.index("IDS")
+        cols.insert(idx, "Type")
+        merged = merged[cols]
+
+    return merged
+
 # ------------------------------------------------------------------------------
 # 2. Main Execution Block
 # ------------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Define the base path for the data folder
     BASE_PATH = Path(__file__).resolve().parent.parent.parent / "data/patents"
-    
-    # Read the JSON file that contains the desired compounds and properties
     json_path = Path("json/properties.json")
     with open(json_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
-    
-    # Create the directory to save the filtered DataFrames (if it does not exist)
+
     filtered_path = Path("data/filtered")
     filtered_path.mkdir(parents=True, exist_ok=True)
-    
-    # Process both LEFT and RIGHT final DataFrames
+
+    # caminho do CSV de classificações que você já gera no outro script
+    classification_csv = filtered_path / "classifications.csv"
+
     for side in ("LEFT", "RIGHT"):
-        # Find the merged file generated previously (e.g., "LEFT_Merged_df(123x12).csv")
         merged_files = list(BASE_PATH.glob(f"{side}_Merged_df*.csv"))
         if not merged_files:
             print(f"No merged file found for {side}. Skipping.")
             continue
         merged_path = merged_files[0]
-        
-        # Load the merged DataFrame from CSV
         dataframe_original = pd.read_csv(merged_path, low_memory=False)
-        
-        # Apply all filters to generate the final filtered DataFrame
+
+        # aplica todos os filtros
         final_df = apply_all_filters_until_final(dataframe_original, data)
-        
-        # Save the final DataFrame with shape in the filename
+
+        # **AQUI**: injeta a coluna 'Type' via merge com classifications.csv
+        final_df = apply_classification(final_df, classification_csv)
+
+        # salva com shape no nome
         rows, cols = final_df.shape
         final_filename = f"{side}_Final_df({rows}x{cols}).csv"
         final_df.to_csv(filtered_path / final_filename, index=False)
-        
-        # Print a success message
+
         print(f"{final_filename} generated successfully: {rows} rows and {cols} columns.")
-    
+
     print("All final DataFrames generated successfully.")
