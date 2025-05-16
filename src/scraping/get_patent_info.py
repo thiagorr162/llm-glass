@@ -1,94 +1,53 @@
 import argparse
 import json
 from pathlib import Path
+
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.webdriver.firefox.service import Service
-from selenium.webdriver.firefox.options import Options
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-# python src/scraping/get_patent_info.py -p {n_pages} -w {wait} -k {keywords} -c {country} -r {results_number}
-
 parser = argparse.ArgumentParser(
-    description="Patent search on Google Patents based on keywords and page numbers."
+    description="Patent search on Google Patents based on a list of patent urls.",
 )
 
+
 parser.add_argument(
-    "--pages",
-    "-p",
-    type=int,
-    default=2,
-    help="Number of pages to search (default: 2)",
-)
-parser.add_argument(
-    "--wait_time",  
+    "--wait_time",
     "-w",
     type=int,
-    default=0,
+    default=1,
     help="Seconds to wait after the patent has loaded(default: 0)",
 )
-parser.add_argument(
-    "--keywords",
-    "-k",
-    nargs="+",
-    default=["glass", "refractive"],
-    help="List of keywords for search (default: ['glass', 'refractive'])",
-)
-parser.add_argument(
-    "--country",
-    "-c",
-    type=str,
-    default=None,
-    help="Country to search for patents (default: None, search in any country).",
-)
+
 parser.add_argument(
     "--selenium_path",
+    "-sp",
     type=str,
-    default="src/scraping/geckodriver.exe",
+    default="/snap/bin/firefox.geckodriver",
     help="Path to the Selenium driver.",
-)
-parser.add_argument(
-    "--results",
-    "-r",
-    type=int,
-    default=100,
-    help="Number of results per page in the search (default: 100)",
 )
 
 args = parser.parse_args()
-results = args.results
-keywords = args.keywords
-pages = args.pages
-country = args.country
-wait_time = args.wait_time  
+wait_time = args.wait_time
+geckodriver_path = args.selenium_path
+
+
+patent_urls_links_path = Path("data/urls/")
+
 all_urls = []
 
-geckodriver_path = args.selenium_path
-service = Service(executable_path=geckodriver_path)
-
-firefox_binary_path = "C:/Program Files/Mozilla Firefox/firefox.exe"
-options = Options()
-options.binary = firefox_binary_path
-
-browser = webdriver.Firefox(service=service, options=options)
-
-def construct_search_url(keywords, page, results, country=None):
-    base_url = "https://patents.google.com/?q="
-    keyword_query = "&q=".join([f"({keyword})" for keyword in keywords])
-    url = f"{base_url}{keyword_query}&num={results}&page={page}"
-    if country:
-        url += f"&country={country.upper()}"
-    return url
-
-# Loading URLs from the file
-with open('C:/Users/thoma/Downloads/urls_eric.txt', 'r') as file:
+with open(patent_urls_links_path / "test_patents.txt", "r") as file:
     all_urls = [linha.strip() for linha in file]
+
+driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
+browser = webdriver.Firefox(service=driver_service)
 
 output_dir = Path("data/patents")
 output_dir.mkdir(parents=True, exist_ok=True)
+
 
 for url in all_urls:
     file_name = url.replace("https://", "").replace(".", "_").replace("/", "_")
@@ -158,4 +117,4 @@ for url in all_urls:
 
 browser.quit()
 
-print("Operation completed successfully.") 
+print("Operation completed successfully.")
