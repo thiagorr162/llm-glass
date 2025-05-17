@@ -46,7 +46,7 @@ with open(patent_urls_links_path / "test_patents.txt", "r") as file:
 driver_service = webdriver.FirefoxService(executable_path=geckodriver_path)
 browser = webdriver.Firefox(service=driver_service)
 
-output_dir = Path("data/patents")
+output_dir = Path("data/patents/metadata")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 has_no_tables = []
