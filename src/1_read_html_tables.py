@@ -38,7 +38,6 @@ properties_file = Path("json/desired_compounds.json")
 with properties_file.open(encoding="utf-8") as f:
     properties_data = json.load(f)
     desired_compounds = [compound.lower() for compound in properties_data]
-breakpoint()
 
 # Define the directory containing patent JSON files
 json_folder = Path("data/patents")
@@ -54,7 +53,6 @@ for json_file in json_files:
 
     for idx, patent_tables in enumerate(data["html_tables"], start=1):
         # Parse the HTML content for table extraction
-        breakpoint()
         soup = BeautifulSoup(patent_tables, "html.parser")
         patent_table_elements = soup.find_all("patent-tables")
 
@@ -66,8 +64,12 @@ for json_file in json_files:
             print(f"No <patent-tables> tag found in {json_file.name}")
             continue
 
+        # breakpoint()
         # Use only the first <patent-tables> element for table conversion
         patent_table = patent_table_elements[0]
+
+        assert len(patent_table_elements) == 1, "patent_table_elements has more than 1 element"
+
         table_data = html_table_to_list(patent_table)
 
         # Check if any cell in the table matches one of the desired compounds
@@ -85,13 +87,9 @@ for json_file in json_files:
         # Construct the output CSV filename including the table index
         output_file = output_folder / f"{json_file.stem}-table_{idx}.csv"
 
-        try:
-            # Write the extracted table rows to a CSV file
-            with output_file.open(mode="w", newline="", encoding="utf-8") as file:
-                writer = csv.writer(file, delimiter=",")
-                writer.writerows(table_data)
-            print(f"Table saved to: {output_file}")
-        except IOError as e:
-            print(f"Error saving file {output_file.name}: {e}")
+        with output_file.open(mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file, delimiter=",")
+            writer.writerows(table_data)
+        print(f"Table saved to: {output_file}")
 
 print("Operation completed successfully.")
