@@ -1,10 +1,10 @@
-import csv
 import json
 import re
 import unicodedata
 from pathlib import Path
 
 from bs4 import BeautifulSoup
+from tqdm import tqdm
 
 
 def normalize_string(s):
@@ -22,6 +22,7 @@ def normalize_string(s):
     return re.sub(r"\s+", "", unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("utf-8").lower())
 
 
+# TODO: não sei se isso é necessário, mas nao vou tirar agora pq pode quebrar tudo
 def html_table_to_list(table):
     """
     Convert an HTML <table> element into a list of rows, where each row is a list of text values.
@@ -40,14 +41,13 @@ with properties_file.open(encoding="utf-8") as f:
     desired_compounds = [compound.lower() for compound in properties_data]
 
 # Define the directory containing patent JSON files
-json_folder = Path("data/patents")
+json_folder = Path("data/patents/metadata")
 
 # Recursively search for all JSON files under the patents directory
-json_files = list(json_folder.rglob("*.json"))
-print(f"Found {len(json_files)} JSON files.")
+json_files = json_folder.rglob("*.json")
 
-# Recursively search for all JSON files under the patents directory
-for json_file in json_files:
+
+for json_file in tqdm(json_files):
     with json_file.open(encoding="utf-8") as f:
         data = json.load(f)
 
@@ -56,19 +56,12 @@ for json_file in json_files:
         soup = BeautifulSoup(patent_tables, "html.parser")
         patent_table_elements = soup.find_all("patent-tables")
 
-        # Warn if multiple <patent-tables> tags are found
-        if len(patent_table_elements) > 1:
-            print(f"Multiple <patent-tables> tags found in {json_file.name}")
-        # Skip if no <patent-tables> tag is present
         if not patent_table_elements:
-            print(f"No <patent-tables> tag found in {json_file.name}")
             continue
 
-        # breakpoint()
-        # Use only the first <patent-tables> element for table conversion
-        patent_table = patent_table_elements[0]
-
         assert len(patent_table_elements) == 1, "patent_table_elements has more than 1 element"
+
+        patent_table = patent_table_elements[0]
 
         table_data = html_table_to_list(patent_table)
 
@@ -79,17 +72,19 @@ for json_file in json_files:
             for cell in row
         )
 
-        # Create an output directory under the JSON file's parent:
-        # 'good_tables' if table contains desired compounds, otherwise 'bad_tables'
-        output_folder = json_file.parent / "tables" / ("good_tables" if contains_desired else "bad_tables")
-        output_folder.mkdir(parents=True, exist_ok=True)
+        output_folder = json_file.parent
+        output_folder = Path(str(output_folder).replace("/metadata/", "/individual_tables/"))
 
-        # Construct the output CSV filename including the table index
-        output_file = output_folder / f"{json_file.stem}-table_{idx}.csv"
+        tables_folder = output_folder / ("compounds" if contains_desired else "not_compounds")
 
-        with output_file.open(mode="w", newline="", encoding="utf-8") as file:
-            writer = csv.writer(file, delimiter=",")
-            writer.writerows(table_data)
-        print(f"Table saved to: {output_file}")
+        tables_folder.mkdir(parents=True, exist_ok=True)
+
+        html_file = tables_folder / f"{json_file.stem}-table_{idx}.html"
+        html_file.write_text(str(patent_table), encoding="utf-8")
+
+    # Save original JSON data
+    json_copy = output_folder / f"{json_file.stem}-original.json"
+    json_copy.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+
 
 print("Operation completed successfully.")
