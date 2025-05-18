@@ -2,13 +2,8 @@
 
 /bin
 /cache
-/data
-/docs
-/models
-/out
 /personal
-/visualization
-/data/filtered
+/data/patents
 # Python stuff
 *.ipynb_checkpoints/
 *.mypy_cache/
