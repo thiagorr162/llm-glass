@@ -1,8 +1,19 @@
+import unicodedata
 from pathlib import Path
 
 import pandas as pd
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+
+
+def normalize_string(s):
+    if s is None:
+        return s
+    s = s.lower().strip()
+    s = unicodedata.normalize("NFKD", s)
+    s = "".join(c for c in s if not unicodedata.combining(c))
+    return s
+
 
 tables_folder = Path("data/patents/processing")
 html_files = tables_folder.rglob("*.html")
@@ -26,6 +37,9 @@ for file in tqdm(html_files):
         if rows:
             df = pd.DataFrame(rows)
             df = df.T
+
+            # Normalização
+            df = df.map(normalize_string)
 
             # Define pasta de saída com base na estrutura original
             output_folder = Path(str(file.parent).replace("/has_compounds", "/splited/"))
