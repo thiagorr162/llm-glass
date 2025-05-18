@@ -1,0 +1,21 @@
+- good
+patents_google_com_patent_US11667561B2_en
+patents_google_com_patent_US11858846B2_en
+patents_google_com_patent_US11919807B2_en
+patents_google_com_patent_US20190322571A1_en
+patents_google_com_patent_US20210130222A1_en
+patents_google_com_patent_US20230192528A1_en
+
+
+
+
+- ugly
+patents_google_com_patent_US7943540B2_en
+patents_google_com_patent_US11485676B2_en
+patents_google_com_patent_US11667561B2_en
+patents_google_com_patent_US7704903B2_en
+patents_google_com_patent_US20240025797A1_en
+
+
+- very ugly
+patents_google_com_patent_US11919807B2_en
