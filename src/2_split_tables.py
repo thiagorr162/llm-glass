@@ -25,6 +25,7 @@ for file in tqdm(html_files):
 
         if rows:
             df = pd.DataFrame(rows)
+            df = df.T
 
             # Define pasta de saída com base na estrutura original
             output_folder = Path(str(file.parent).replace("/has_compounds", "/splited/"))
