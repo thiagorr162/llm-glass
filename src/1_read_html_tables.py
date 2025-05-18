@@ -78,9 +78,9 @@ for json_file in tqdm(json_files):
         # vou salvar só se tiver composto
         if contains_desired:
             output_folder = json_file.parent
-            output_folder = Path(str(output_folder).replace("/metadata/", "/individual_tables/"))
+            output_folder = Path(str(output_folder).replace("/metadata/", "/processing/"))
 
-            tables_folder = output_folder / "tables"
+            tables_folder = output_folder / "has_compounds"
             tables_folder.mkdir(parents=True, exist_ok=True)
 
             html_file = tables_folder / f"{json_file.stem}-table_{idx}.html"
