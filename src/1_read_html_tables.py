@@ -51,6 +51,8 @@ for json_file in tqdm(json_files):
     with json_file.open(encoding="utf-8") as f:
         data = json.load(f)
 
+    has_a_good_table = False
+
     for idx, patent_tables in enumerate(data["html_tables"], start=1):
         # Parse the HTML content for table extraction
         soup = BeautifulSoup(patent_tables, "html.parser")
@@ -59,32 +61,36 @@ for json_file in tqdm(json_files):
         if not patent_table_elements:
             continue
 
+        # TODO: nao lembro pq isso é vdd
         assert len(patent_table_elements) == 1, "patent_table_elements has more than 1 element"
 
         patent_table = patent_table_elements[0]
 
         table_data = html_table_to_list(patent_table)
 
-        # Check if any cell in the table matches one of the desired compounds
+        # checa se algum composto tá na tabela
         contains_desired = any(
             any(desired in normalize_string(cell) for desired in desired_compounds)
             for row in table_data
             for cell in row
         )
 
-        output_folder = json_file.parent
-        output_folder = Path(str(output_folder).replace("/metadata/", "/individual_tables/"))
+        # vou salvar só se tiver composto
+        if contains_desired:
+            output_folder = json_file.parent
+            output_folder = Path(str(output_folder).replace("/metadata/", "/individual_tables/"))
 
-        tables_folder = output_folder / ("compounds" if contains_desired else "not_compounds")
+            tables_folder = output_folder / "tables"
+            tables_folder.mkdir(parents=True, exist_ok=True)
 
-        tables_folder.mkdir(parents=True, exist_ok=True)
+            html_file = tables_folder / f"{json_file.stem}-table_{idx}.html"
+            html_file.write_text(str(patent_table), encoding="utf-8")
 
-        html_file = tables_folder / f"{json_file.stem}-table_{idx}.html"
-        html_file.write_text(str(patent_table), encoding="utf-8")
+            has_a_good_table = True
 
-    # Save original JSON data
-    json_copy = output_folder / f"{json_file.stem}-original.json"
-    json_copy.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    if has_a_good_table:
+        json_copy = output_folder / f"{json_file.stem}-original.json"
+        json_copy.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
 print("Operation completed successfully.")
